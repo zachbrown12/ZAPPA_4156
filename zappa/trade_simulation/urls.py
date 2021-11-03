@@ -1,6 +1,8 @@
-from django.urls import path
+from django.urls import path, include
 from . import views 
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.stocks, name="tickers"),
+    path('stocks/', views.stocks, name="tickers"),
+    path('stock/<str:pk>/', views.stock, name="ticker")
 ]

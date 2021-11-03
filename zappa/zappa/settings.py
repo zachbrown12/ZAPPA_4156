@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'trade_simulation.apps.TradeSimulationConfig',
+
+    'rest_framework',
+
 ]
 
 MIDDLEWARE = [
