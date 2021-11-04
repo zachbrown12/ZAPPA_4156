@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import GameSerializer, PortfolioSerializer, StockSerializer, TransactionSerializer
-from trade_simulation.models import Game, Portfolio, Stock, Transaction
+from zappa.trade_simulation.models import Game, Portfolio, Stock, Transaction
 
 @api_view(['GET'])
 def getRoutes(request):

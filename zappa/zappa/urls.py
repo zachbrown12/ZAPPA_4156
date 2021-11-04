@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('trade_simulation', include('trade_simulation.urls')),
-    path('api/', include('api.urls')),
+    path('', include('zappa.trade_simulation.urls')),
+    path('api/', include('zappa.api.urls')),
 ]

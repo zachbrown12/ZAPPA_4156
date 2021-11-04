@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'trade_simulation.apps.TradeSimulationConfig',
+    'zappa.trade_simulation.apps.TradeSimulationConfig',
 
     'rest_framework',
 
