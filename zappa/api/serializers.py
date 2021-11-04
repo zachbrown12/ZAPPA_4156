@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from zappa.trade_simulation.models import Game, Portfolio, Stock, Transaction
+from trade_simulation.models import Game, Portfolio, Stock, Transaction
 
 
 class UserSerializer(serializers.ModelSerializer):
