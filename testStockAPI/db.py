@@ -65,7 +65,7 @@ def add_account(accountname, startingcash):
 def get_account(accountname):
     con, cur = connection()
     try:
-        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s", (accountname,))
+        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s", (accountname))
         row = cur.fetchone()
         return row
     except Error as e:
@@ -81,7 +81,7 @@ def buy_stock(accountname, ticker, cash):
     con, cur = connection()
     ticker = ticker.upper()
     try:
-        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s", (accountname,))
+        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s", (accountname))
         row = cur.fetchone()
         if not row:
             raise ValueError("Account {} not found.".format(accountname))
