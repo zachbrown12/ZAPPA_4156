@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'trade_simulation.apps.TradeSimulationConfig',
+    'users.apps.UsersConfig',
 
     'rest_framework',
 

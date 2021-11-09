@@ -1,0 +1,19 @@
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+        {% endfor %}
+</ul>
+{% endif %} 
+
+{% block content %}
+
+<form action="{% url 'login' %}" method="POST">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="Username" />
+    <input type="password" name="password" placeholder="Enter password" />
+    <input type="submit" value="Login" />
+
+</form>
+
+{% endblock content %}
