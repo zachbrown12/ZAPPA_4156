@@ -5,11 +5,13 @@ from stockdata import Stockdata
 
 
 def connection():
-    con = psycopg2.connect(database="postgres",
-                           user="postgres",
-                           password="incaroads",
-                           host="127.0.0.1",
-                           port="5433")
+    con = psycopg2.connect(
+        database="postgres",
+        user="postgres",
+        password="incaroads",
+        host="127.0.0.1",
+        port="5433",
+    )
     cur = con.cursor()
     return con, cur
 
@@ -17,10 +19,12 @@ def connection():
 def create_table():
     con, cur = connection()
     try:
-        cur.execute('''CREATE TABLE ACCOUNTS
+        cur.execute(
+            """CREATE TABLE ACCOUNTS
             (ACCOUNTNAME VARCHAR PRIMARY KEY NOT NULL,
             CASHBALANCE FLOAT NOT NULL,
-            STOCKPORTFOLIO VARCHAR);''')
+            STOCKPORTFOLIO VARCHAR);"""
+        )
     except Error as e:
         print(e)
     finally:
@@ -44,10 +48,12 @@ def delete_table():
 def add_account(accountname, startingcash):
     con, cur = connection()
     try:
-        cur.execute('''INSERT INTO ACCOUNTS
+        cur.execute(
+            """INSERT INTO ACCOUNTS
                     (ACCOUNTNAME,CASHBALANCE,STOCKPORTFOLIO)
-                    VALUES (%s, %s, '{}');''',
-                    (accountname, startingcash))
+                    VALUES (%s, %s, '{}');""",
+            (accountname, startingcash),
+        )
     except Error as e:
         print(e)
     finally:
@@ -59,8 +65,7 @@ def add_account(accountname, startingcash):
 def get_account(accountname):
     con, cur = connection()
     try:
-        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s",
-                    (accountname,))
+        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s", (accountname,))
         row = cur.fetchone()
         return row
     except Error as e:
@@ -76,14 +81,12 @@ def buy_stock(accountname, ticker, cash):
     con, cur = connection()
     ticker = ticker.upper()
     try:
-        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s",
-                    (accountname,))
+        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s", (accountname,))
         row = cur.fetchone()
         if not row:
             raise ValueError("Account {} not found.".format(accountname))
         if cash > row[1]:
-            raise ValueError("{} does not have {} in cash.".format(
-                                                    accountname, cash))
+            raise ValueError("{} does not have {} in cash.".format(accountname, cash))
         try:
             portfolio = loads(row[2])
         except JSONDecodeError:
@@ -93,14 +96,16 @@ def buy_stock(accountname, ticker, cash):
             raise ValueError("Ticker {} is not available.".format(ticker))
         if price == 0:
             raise ValueError("No trading available now.")
-        shares = cash/price
+        shares = cash / price
         if ticker in portfolio:
             portfolio[ticker] += shares
         else:
             portfolio[ticker] = shares
-        cur.execute('''UPDATE ACCOUNTS SET CASHBALANCE = %s,
-                    STOCKPORTFOLIO = %s''',
-                    (row[1] - cash, dumps(portfolio)))
+        cur.execute(
+            """UPDATE ACCOUNTS SET CASHBALANCE = %s,
+                    STOCKPORTFOLIO = %s""",
+            (row[1] - cash, dumps(portfolio)),
+        )
     except ValueError as e:
         print(e)
     finally:
@@ -113,8 +118,7 @@ def sell_stock(accountname, ticker, shares):
     con, cur = connection()
     ticker = ticker.upper()
     try:
-        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s",
-                    (accountname,))
+        cur.execute("SELECT * FROM ACCOUNTS WHERE ACCOUNTNAME = %s", (accountname,))
         row = cur.fetchone()
         if not row:
             raise ValueError("Account {} not found.".format(accountname))
@@ -123,21 +127,26 @@ def sell_stock(accountname, ticker, shares):
         except JSONDecodeError:
             portfolio = {}
         if ticker not in portfolio:
-            raise ValueError("{} is not in {}'s portfolio.".format(
-                                                ticker, accountname))
+            raise ValueError("{} is not in {}'s portfolio.".format(ticker, accountname))
         if shares > portfolio[ticker]:
-            raise ValueError('''{}'s portfolio does not have {} shares
-                             of {}.'''.format(accountname, shares, ticker))
+            raise ValueError(
+                """{}'s portfolio does not have {} shares
+                             of {}.""".format(
+                    accountname, shares, ticker
+                )
+            )
         price = Stockdata(ticker).bidPrice()
         if price is None:
             raise ValueError("Ticker {} is not available.".format(ticker))
         if price == 0:
             raise ValueError("No trading available now.")
-        cash = price*shares
+        cash = price * shares
         portfolio[ticker] -= shares
-        cur.execute('''UPDATE ACCOUNTS SET CASHBALANCE = %s,
-                    STOCKPORTFOLIO = %s''',
-                    (row[1] + cash, dumps(portfolio)))
+        cur.execute(
+            """UPDATE ACCOUNTS SET CASHBALANCE = %s,
+                    STOCKPORTFOLIO = %s""",
+            (row[1] + cash, dumps(portfolio)),
+        )
     except ValueError as e:
         print(e)
     finally:
@@ -148,13 +157,13 @@ def sell_stock(accountname, ticker, shares):
 
 delete_table()
 create_table()
-add_account('test_account', 1000.0)
+add_account("test_account", 1000.0)
 
-buy_stock('test_account', 'aapl', 100.0)
-print(get_account('test_account'))
-buy_stock('test_account', 'aapl', 50.0)
-print(get_account('test_account'))
-buy_stock('test_account', 'tsla', 100.0)
-print(get_account('test_account'))
-sell_stock('test_account', 'AAPL', 0.5)
-print(get_account('test_account'))
+buy_stock("test_account", "aapl", 100.0)
+print(get_account("test_account"))
+buy_stock("test_account", "aapl", 50.0)
+print(get_account("test_account"))
+buy_stock("test_account", "tsla", 100.0)
+print(get_account("test_account"))
+sell_stock("test_account", "AAPL", 0.5)
+print(get_account("test_account"))
