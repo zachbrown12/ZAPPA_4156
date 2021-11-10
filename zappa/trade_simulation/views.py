@@ -3,8 +3,8 @@ from django.http import HttpResponse
 
 # Create your views here.
 
-def stocks(request):
-    return HttpResponse('Here are the stocks')
+def portfolios(request):
+    return HttpResponse('Here are the portfolios')
 
-def stock(request, pk):
-    return HttpResponse('Single Stock' + ' ' + str(pk))
+def portfolio(request, pk):
+    return HttpResponse('Single Portfolio' + ' ' + str(pk))

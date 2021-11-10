@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from trade_simulation.models import Game, Portfolio, Stock, Transaction
+from trade_simulation.models import Game, Portfolio, Holding, Transaction
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,14 +20,14 @@ class PortfolioSerializer(serializers.ModelSerializer):
         model = Portfolio
         fields = '__all__'
 
-class StockSerializer(serializers.ModelSerializer):
+class HoldingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Stock
+        model = Holding
         fields = '__all__'
 
 class TransactionSerializer(serializers.ModelSerializer):
     portfolio = PortfolioSerializer(many=False)
-    stock = StockSerializer(many=False)
+    holding = HoldingSerializer(many=False)
     class Meta:
         model = Transaction
         fields = '__all__'

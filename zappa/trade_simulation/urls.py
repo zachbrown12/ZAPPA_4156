@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import views 
 
 urlpatterns = [
-    path('', views.stocks, name="tickers"),
-    path('stocks/', views.stocks, name="tickers"),
-    path('stock/<str:pk>/', views.stock, name="ticker")
+    path('', views.portfolios, name="title"),
+    path('portfolios/', views.portfolios, name="title"),
+    path('portfolio/<str:pk>/', views.portfolios, name="title")
 ]

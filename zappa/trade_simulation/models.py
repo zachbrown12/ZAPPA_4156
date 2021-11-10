@@ -23,9 +23,8 @@ class Portfolio(models.Model):
     game = models.ForeignKey(
         Game, null=True, blank=True, on_delete=models.CASCADE)
     title = models.TextField(max_length=200)
-    cash_balance = models.DecimalField(max_digits=14, decimal_places=2)
-    equity_value = models.DecimalField(max_digits=14, decimal_places=2)
-    total_value = models.DecimalField(max_digits=14, decimal_places=2)
+    cash_balance = models.DecimalField(max_digits=14, decimal_places=2, default=10000.00)
+    total_value = models.DecimalField(max_digits=14, decimal_places=2, default=10000.00)
     created_on = models.DateTimeField(auto_now_add=True)
     id = models.UUIDField(default=uuid.uuid4,unique=True, 
                           primary_key=True, editable=False)
@@ -33,9 +32,28 @@ class Portfolio(models.Model):
     def __str__(self):
         return self.title
 
-class Stock(models.Model):
+    def equity_value(self):
+        value = 0
+        holdings = Holding.objects.filter(portfolio=self)
+        for holding in holdings:
+            value += (holding.shares * holding.current_price)
+
+        if len(holdings) > 0:
+            return value
+        else:
+            return 0
+
+    def total_value(self):
+        total = self.equity_value() + self.cash_balance
+        return total 
+
+
+class Holding(models.Model):
+    portfolio =  models.ForeignKey(
+        Portfolio, null=True, blank=True, on_delete=models.CASCADE)
     ticker = models.TextField(max_length=200)
-    current_price = models.DecimalField(max_digits=14, decimal_places=2)
+    shares = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, null=True)
+    current_price = models.DecimalField(max_digits=14, decimal_places=2, default=0.00)
     created_on = models.DateTimeField(auto_now_add=True)
     id = models.UUIDField(default=uuid.uuid4,unique=True, 
                           primary_key=True, editable=False)
@@ -43,18 +61,24 @@ class Stock(models.Model):
     def __str__(self):
         return self.ticker
 
+    @property
+    def getValue(self):
+        value = self.current_price * self.shares
+        self.value = value
+        self.save()
+
 class Transaction(models.Model):
     portfolio =  models.ForeignKey(
         Portfolio, null=True, blank=True, on_delete=models.CASCADE)
-    stock = models.ForeignKey(
-        Stock, null=True, blank=True, on_delete=models.CASCADE)
+    ticker = models.TextField(max_length=200)
     tradeType = models.TextField(max_length=200)
-    shares = models.IntegerField()
+    shares = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, null=True)
+    bought_price = models.DecimalField(max_digits=14, decimal_places=2, default=0.00)
     created_on = models.DateTimeField(auto_now_add=True)
     id = models.UUIDField(default=uuid.uuid4,unique=True, 
                           primary_key=True, editable=False)
 
     def __str__(self):
-        return (self.title)
+        return (self.ticker)
 
     
