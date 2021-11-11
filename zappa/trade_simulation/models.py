@@ -1,6 +1,4 @@
 from django.db import models
-# from django.db.models.aggregates import Max
-# from django.db.models.deletion import CASCADE
 from django.contrib.auth.models import User
 import uuid
 from yfinance import Ticker
@@ -14,23 +12,23 @@ class Game(models.Model):
     end_date = models.DateTimeField()
     winner = models.CharField(max_length=200, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
-    id = models.UUIDField(default=uuid.uuid4, unique=True,
-                          primary_key=True, editable=False)
+    id = models.UUIDField(
+        default=uuid.uuid4, unique=True, primary_key=True, editable=False
+    )
 
 
 class Portfolio(models.Model):
-    owner = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.CASCADE)
-    game = models.ForeignKey(
-        Game, null=True, blank=True, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, null=True, blank=True, on_delete=models.CASCADE)
     title = models.TextField(max_length=200)
     cash_balance = models.DecimalField(max_digits=14, decimal_places=2,
                                        default=10000.00)
     total_value = models.DecimalField(max_digits=14, decimal_places=2,
                                       default=10000.00)
     created_on = models.DateTimeField(auto_now_add=True)
-    id = models.UUIDField(default=uuid.uuid4, unique=True,
-                          primary_key=True, editable=False)
+    id = models.UUIDField(
+        default=uuid.uuid4, unique=True, primary_key=True, editable=False
+    )
 
     def __str__(self):
         return self.title
@@ -110,8 +108,9 @@ class Holding(models.Model):
     shares = models.DecimalField(max_digits=14, decimal_places=2,
                                  default=0.00, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
-    id = models.UUIDField(default=uuid.uuid4, unique=True,
-                          primary_key=True, editable=False)
+    id = models.UUIDField(
+        default=uuid.uuid4, unique=True, primary_key=True, editable=False
+    )
 
     def __str__(self):
         return self.ticker
@@ -155,3 +154,4 @@ class Transaction(models.Model):
 
     def __str__(self):
         return (self.ticker)
+      

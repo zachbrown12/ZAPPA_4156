@@ -1,12 +1,15 @@
-# from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import GameSerializer, PortfolioSerializer, \
-                         HoldingSerializer, TransactionSerializer
-from trade_simulation.models import Game, Portfolio, Holding, Transaction
+from .serializers import (
+    GameSerializer,
+    PortfolioSerializer,
+    StockSerializer,
+    TransactionSerializer,
+)
+from trade_simulation.models import Game, Portfolio, Stock, Transaction
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 def getRoutes(request):
 
     routes = [
@@ -35,7 +38,7 @@ def getPortfolios(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 def getPortfolio(request, pk):
     portfolio = Portfolio.objects.get(id=pk)
     portfolio.computeTotalValue()
@@ -89,7 +92,7 @@ def getTransactions(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 def getTransaction(request, pk):
     transaction = Transaction.objects.get()
     serializer = TransactionSerializer(transaction, many=False)

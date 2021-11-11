@@ -1,7 +1,7 @@
 import yfinance as yf
 
 
-class Stockdata():
+class Stockdata:
     def __init__(self, ticker):
         self.stock = yf.Ticker(str(ticker)).info
         self.valid = True
