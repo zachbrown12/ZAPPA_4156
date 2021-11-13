@@ -11,7 +11,7 @@ urlpatterns = [
     path('buystock/<str:pk>', views.buyStock),
     path('sellstock/<str:pk>', views.sellStock),
     path('holdings/', views.getHoldings),
-    path('holding/<str:pk>', views.getHolding),
+    path('holdings/<str:pk>', views.getHolding),
     path('transactions/', views.getTransactions),
     path('transactions/<str:pk>', views.getTransaction),
 ]
