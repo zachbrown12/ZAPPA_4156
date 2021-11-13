@@ -24,6 +24,10 @@ def getRoutes(request):
         {'GET': '/api/transaction/id'},
         {'GET': '/api/games'},
         {'GET': '/api/game/id'},
+        {'POST': '/api/newgame'},
+        {'POST': '/api/addnewportfolio/id'},
+        {'POST': '/api/addexistingportfolio/id'},
+        {'POST': '/api/removeportfolio/id'},
     ]
 
     return Response(routes)
@@ -108,6 +112,60 @@ def getGames(request):
 
 @api_view(['GET'])
 def getGame(request, pk):
-    game = Game.objects.get()
+    game = Game.objects.get(id=pk)
     serializer = GameSerializer(game, many=False)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def makeGame(request):
+    data = request.data
+    game = Game.objects.create()
+    game.title = data['title']
+    game.rules = data['rules']
+    if 'startingBalance' in data:
+        game.startingBalance = float(data['startingBalance'])
+    game.save()
+    return Response()
+
+
+@api_view(['POST'])
+def addNewPortfolio(request, pk):
+    data = request.data
+    game = Game.objects.get(id=pk)
+    portfolio = Portfolio.objects.create()
+    portfolio.game = game
+    portfolio.cash_balance = float(game.startingBalance)
+    portfolio.total_value = float(game.startingBalance)
+    portfolio.title = data['title']
+    portfolio.save()
+    return Response()
+
+
+@api_view(['POST'])
+def addExistingPortfolio(request, pk):
+    data = request.data
+    game = Game.objects.get(id=pk)
+    portfolio_id = data['portfolio_id']
+    try:
+        portfolio = Portfolio.objects.get(id=portfolio_id)
+        portfolio.game = game
+        portfolio.save()
+    except Portfolio.DoesNotExist:
+        print("Could not find portfolio ID {}.".format(portfolio_id))
+    return Response()
+
+
+@api_view(['POST'])
+def removePortfolio(request, pk):
+    data = request.data
+    game = Game.objects.get(id=pk)
+    portfolio_id = data['portfolio_id']
+    try:
+        portfolio = Portfolio.objects.get(id=portfolio_id, game=game)
+        portfolio.game = None
+        portfolio.save()
+    except Portfolio.DoesNotExist:
+        print("Could not find portfolio ID {} in game {}.".format(
+              portfolio_id, game.title))
+    return Response()

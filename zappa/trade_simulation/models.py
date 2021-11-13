@@ -6,10 +6,11 @@ from yfinance import Ticker
 
 class Game(models.Model):
     title = models.TextField(max_length=200)
-    startingBalance = models.DecimalField(max_digits=14, decimal_places=2)
+    startingBalance = models.DecimalField(max_digits=14, decimal_places=2,
+                                          default=10000.00)
     rules = models.TextField(max_length=200)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
     winner = models.CharField(max_length=200, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     id = models.UUIDField(
