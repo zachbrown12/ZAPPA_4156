@@ -129,8 +129,7 @@ class Holding(models.Model):
     # Get the ask price (what you can buy immediately for)
     def askprice(self):
         stockInfo = Ticker(str(self.ticker)).info
-        if ("regularMarketPrice" not in stockInfo
-                and "ask" not in stockInfo):
+        if ("ask" not in stockInfo):
             return None
         if stockInfo["ask"] == 0:
             return stockInfo["regularMarketPrice"]
@@ -139,8 +138,7 @@ class Holding(models.Model):
     # Get the bid price (what you can sell immediately for)
     def bidprice(self):
         stockInfo = Ticker(str(self.ticker)).info
-        if ("regularMarketPrice" not in stockInfo
-                and "bid" not in stockInfo):
+        if ("bid" not in stockInfo):
             return None
         if stockInfo["bid"] == 0:
             return stockInfo["regularMarketPrice"]
