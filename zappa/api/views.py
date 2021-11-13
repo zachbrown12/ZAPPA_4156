@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from .serializers import (
     GameSerializer,
     PortfolioSerializer,
-    StockSerializer,
+    HoldingSerializer,
     TransactionSerializer,
 )
-from trade_simulation.models import Game, Portfolio, Stock, Transaction
+from trade_simulation.models import Game, Portfolio, Holding, Transaction
 
 
 @api_view(["GET"])

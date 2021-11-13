@@ -60,10 +60,13 @@ class Portfolio(models.Model):
     def buyHolding(self, ticker, shares):
 
         holding, created = Holding.objects.get_or_create(
-                            portfolio=self,
-                            ticker=ticker)
+            portfolio=self,
+            ticker=ticker)
 
         price = holding.askprice()
+        if price is None:
+            print("Ticker {} is not currently traded.".format(ticker))
+            return
         cost = price * float(shares)
         if float(self.cash_balance) < cost:
             print("Not enough cash to buy ${} of {}.".format(cost, ticker))
@@ -81,21 +84,29 @@ class Portfolio(models.Model):
     # Sell <shares> shares of stock <ticker>
     def sellHolding(self, ticker, shares):
 
-        holding, created = Holding.objects.get_or_create(
-                            portfolio=self,
-                            ticker=ticker)
-
+        holding = Holding.objects.get(
+            portfolio=self,
+            ticker=ticker)
+        if not holding:
+            print("Holding {} is not in portfolio.".format(ticker))
+            return
         price = holding.bidprice()
+        if price is None:
+            print("Ticker {} is not currently traded.".format(ticker))
+            return
         currentshares = float(0 if holding.shares is None else holding.shares)
         if currentshares < float(shares):
             print("Not enough shares of {} to sell {}.".format(
-                        ticker, float(shares)))
+                  ticker, float(shares)))
             return
         holding.shares = currentshares - float(shares)
-        holding.save()
+        if holding.shares == 0.0:
+            holding.delete()
+        else:
+            holding.save()
 
-        self.cash_balance = (float(self.cash_balance) +
-                             (price * float(shares)))
+        self.cash_balance = (float(self.cash_balance)
+                             + (price * float(shares)))
         self.save()
 
         self.addTransaction(ticker, shares, price, "Sell")
@@ -154,4 +165,3 @@ class Transaction(models.Model):
 
     def __str__(self):
         return (self.ticker)
-      
