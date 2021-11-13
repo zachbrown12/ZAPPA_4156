@@ -14,16 +14,16 @@ def getRoutes(request):
 
     routes = [
         {'GET': '/api/portfolios'},
-        {'GET': '/api/portfolio/id'},
+        {'GET': '/api/portfolios/id'},
         {'POST': '/api/newportfolio'},
         {'POST': '/api/buystock/id'},
         {'POST': '/api/sellstock/id'},
         {'GET': '/api/holdings'},
-        {'GET': '/api/holding/id'},
+        {'GET': '/api/holdings/id'},
         {'GET': '/api/transactions'},
-        {'GET': '/api/transaction/id'},
+        {'GET': '/api/transactions/id'},
         {'GET': '/api/games'},
-        {'GET': '/api/game/id'},
+        {'GET': '/api/games/id'},
     ]
 
     return Response(routes)
@@ -80,7 +80,7 @@ def getHoldings(request):
 
 @api_view(['GET'])
 def getHolding(request, pk):
-    holding = Holding.objects.get()
+    holding = Holding.objects.get(id=pk)
     serializer = HoldingSerializer(holding, many=False)
     return Response(serializer.data)
 
@@ -94,7 +94,7 @@ def getTransactions(request):
 
 @api_view(["GET"])
 def getTransaction(request, pk):
-    transaction = Transaction.objects.get()
+    transaction = Transaction.objects.get(id=pk)
     serializer = TransactionSerializer(transaction, many=False)
     return Response(serializer.data)
 
