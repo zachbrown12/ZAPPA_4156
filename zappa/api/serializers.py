@@ -37,9 +37,6 @@ class PortfolioSerializer(serializers.ModelSerializer):
 
       
 class TransactionSerializer(serializers.ModelSerializer):
-    portfolio = PortfolioSerializer(many=False)
-    holding = HoldingSerializer(many=False)
-
     class Meta:
         model = Transaction
         fields = "__all__"
