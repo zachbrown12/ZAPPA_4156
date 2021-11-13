@@ -25,7 +25,7 @@ class Game(models.Model):
         print(leaderboard)
         for i in range(len(leaderboard)):
             if (i > 0) and (leaderboard[i].total_value == leaderboard[i - 1].total_value):
-                leaderboard[i].game_rank = i
+                leaderboard[i].game_rank = leaderboard[i - 1].game_rank
             else:
                 leaderboard[i].game_rank = i + 1
             leaderboard[i].save()
