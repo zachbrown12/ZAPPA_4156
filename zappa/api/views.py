@@ -106,6 +106,8 @@ def getTransaction(request, pk):
 @api_view(['GET'])
 def getGames(request):
     games = Game.objects.all()
+    for game in games:
+        game.rankPortfolios()
     serializer = GameSerializer(games, many=True)
     return Response(serializer.data)
 
@@ -113,6 +115,7 @@ def getGames(request):
 @api_view(['GET'])
 def getGame(request, pk):
     game = Game.objects.get(id=pk)
+    game.rankPortfolios()
     serializer = GameSerializer(game, many=False)
     return Response(serializer.data)
 

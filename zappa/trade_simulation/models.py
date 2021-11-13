@@ -17,10 +17,24 @@ class Game(models.Model):
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 
+    def rankPortfolios(self):
+        portfolios = Portfolio.objects.filter(game=self)
+        for portfolio in portfolios:
+            portfolio.computeTotalValue()
+        leaderboard = sorted(portfolios, key=lambda p: p.total_value, reverse=True)
+        print(leaderboard)
+        for i in range(len(leaderboard)):
+            if (i > 0) and (leaderboard[i].total_value == leaderboard[i - 1].total_value):
+                leaderboard[i].game_rank = i
+            else:
+                leaderboard[i].game_rank = i + 1
+            leaderboard[i].save()
+
 
 class Portfolio(models.Model):
     owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     game = models.ForeignKey(Game, null=True, blank=True, on_delete=models.CASCADE)
+    game_rank = models.IntegerField(null=True, blank=True)
     title = models.TextField(max_length=200)
     cash_balance = models.DecimalField(max_digits=14, decimal_places=2,
                                        default=10000.00)

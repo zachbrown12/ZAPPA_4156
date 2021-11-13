@@ -18,8 +18,6 @@ class GameSerializer(serializers.ModelSerializer):
 
     def get_portfolios(self, obj):
         portfolios = obj.portfolio_set.all()
-        for portfolio in portfolios:
-            portfolio.computeTotalValue()
         serializer = PortfolioSerializer(portfolios, many=True)
         return serializer.data
 
