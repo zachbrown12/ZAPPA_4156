@@ -33,14 +33,18 @@ def getRoutes(request):
         {"GET": "/api/games"},
         {"POST": "/api/game/game_title"},
         {"DELETE": "/api/game/game_title"},
+
         {"GET": "/api/portfolios"},
-        {"POST": "/api/portfolios"},
+
         {"GET": "/api/portfolio/game_title/port_title"},
         {"POST": "/api/portfolio/game_title/port_title"},
         {"DELETE": "/api/portfolio/game_title/port_title"},
+
         {"POST": "/api/portfolio/trade"},
+
         {"GET": "/api/holdings"},
         {"GET": "/api/holding/game_title/port_title/ticker"},
+
         {"GET": "/api/transactions"},
         {"GET": "/api/transaction/id"},
     ]
