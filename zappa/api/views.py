@@ -24,8 +24,7 @@ def getRoutes(request):
         {"POST": "/api/portfolios/"},
         {"GET": "/api/portfolio/portfolio_id"},
         {"DELETE": "/api/portfolio/portfolio_id"},
-        {"POST": "/api/portfolio/portfolio_id/buy/stock/ticker"},
-        {"POST": "/api/portfolio/portfolio_id/sell/stock/ticker"},
+        {"POST": "/api/portfolio/portfolio_id/trade"},
         {"GET": "/api/holdings"},
         {"GET": "/api/holding/id"},
         {"GET": "/api/transactions"},
@@ -43,9 +42,10 @@ def handle_games(request):
         _create_game_helper(request.data)
         return Response()
     elif request.method == DELETE_METHOD:
-        return Response(_delete_game_helper())
+        return Response(_delete_game_helper(request.data))
 
 
+# TODO:support multiple games
 def _get_game_standings_helper():
     game = Game.objects.all()
     if len(game) <= 0:
@@ -58,6 +58,11 @@ def _get_game_standings_helper():
 
 
 def _create_game_helper(data):
+    # title is a unique field
+    if Game.objects.filter(title=data.get("title")).exists():
+        print("game with same name existed")
+        return
+
     game = Game.objects.create()
     game.title = data.get("title")
     game.rules = data.get("rules")
@@ -67,10 +72,17 @@ def _create_game_helper(data):
     print("Successfully created new game")
 
 
-def _delete_game_helper():
-    response = _get_game_standings_helper()
-    # TODO: delete game
-    return response
+def _delete_game_helper(data):
+    try:
+        game = Game.objects.get(data.get("title"))
+        game.delete()
+        print(f"Successfully deleted game {game.title}")
+    except Game.DoesNotExist:
+        print(
+            "Could not find game with name {}.".format(
+                data.get("title")
+            )
+        )
 
 
 @api_view(["GET", "POST"])
@@ -100,16 +112,14 @@ def _get_portfolio_pk_helper(portfolio_id):
 
 
 def _delete_portfolio_pk_helper(portfolio_id):
-    game = Game.objects.all()[0]  # Assumes there is only one game
     try:
-        portfolio = Portfolio.objects.get(id=id, game=game)
-        portfolio.game = None
-        portfolio.save()
+        portfolio = Portfolio.objects.get(id=portfolio_id)
+        portfolio.delete()
         print(f"Successfully deleted portfolio with id={portfolio_id}")
     except Portfolio.DoesNotExist:
         print(
-            "Could not find portfolio ID {} in game {}.".format(
-                portfolio_id, game.title
+            "Could not find portfolio ID {}.".format(
+                portfolio_id
             )
         )
 
@@ -124,7 +134,26 @@ def _get_portfolio_helper():
 
 
 def _post_portfolio_helper(data):
-    game = Game.objects.all()[0]  # Assumes there is only one game
+    game = None
+
+    try:
+        game = Game.objects.get(title=data.get("gameTitle"))
+    except Game.DoesNotExist:
+        print(
+            "Could not find game with name {}.".format(
+                data.get("gameTitle")
+            )
+        )
+        return
+
+    if Portfolio.objects.filter(title=data.get("title"), game=game).exists():
+        print(
+            "Portfolio named {} is already in game {}.".format(
+                data.get("title"), data.get("gameTitle")
+            )
+        )
+        return
+
     portfolio = Portfolio.objects.create()
     portfolio.game = game
     portfolio.cash_balance = float(game.startingBalance)
@@ -135,12 +164,23 @@ def _post_portfolio_helper(data):
 
 
 @api_view(["POST"])
-def buy(request, pk, ticker):
-    _buy_stock_helper(pk, ticker, request.data)
+def trade(request, pk):
+    securityType = request.data.get("securityType")
+    if securityType == "stock":
+        _trade_stock_helper(pk, request.data)
     return Response()
 
 
-def _buy_stock_helper(portfolio_id, ticker, data):
+def _trade_stock_helper(portfolio_id, data):
+    shares = data.get("shares")
+    if shares > 0:
+        _buy_stock_helper(portfolio_id, data)
+    elif shares < 0:
+        _sell_stock_helper(portfolio_id, data)
+
+
+def _buy_stock_helper(portfolio_id, data):
+    ticker = data.get("ticker")
     portfolio = Portfolio.objects.get(id=portfolio_id)
     portfolio.buyHolding(ticker, data.get("shares"))
     print(
@@ -148,15 +188,10 @@ def _buy_stock_helper(portfolio_id, ticker, data):
     )
 
 
-@api_view(["POST"])
-def sell(request, pk, ticker):
-    _sell_stock_helper(pk, ticker, request.data)
-    return Response()
-
-
-def _sell_stock_helper(portfolio_id, ticker, data):
+def _sell_stock_helper(portfolio_id, data):
+    ticker = data.get("ticker")
     portfolio = Portfolio.objects.get(id=portfolio_id)
-    portfolio.sellHolding(ticker, data.get("shares"))
+    portfolio.sellHolding(ticker, -data.get("shares"))
     print(f"Portfolio id={portfolio_id} sold {data.get('shares')} shares of {ticker}")
 
 
@@ -169,10 +204,14 @@ def handle_holdings(request):
 
 @api_view(["GET"])
 def handle_holding(request, pk):
-    holding = Holding.objects.get(id=pk)
-    serializer = HoldingSerializer(holding, many=False)
-    print(f"Successfully fetched holding id={pk}: {serializer.data}")
-    return Response(serializer.data)
+    try:
+        holding = Holding.objects.get(id=pk)
+        serializer = HoldingSerializer(holding, many=False)
+        print(f"Successfully fetched holding id={pk}: {serializer.data}")
+        return Response(serializer.data)
+    except Holding.DoesNotExist:
+        print(f"Cannt fetched holding id={pk}")
+        return
 
 
 @api_view(["GET"])
