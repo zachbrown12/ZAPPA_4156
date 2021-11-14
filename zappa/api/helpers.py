@@ -102,7 +102,7 @@ def _post_portfolio_helper(title, game_title):
         return
 
     if Portfolio.objects.filter(title=title, game=game).exists():
-        print("Portfolio named {title} is already in game {game_title}.")
+        print(f"Portfolio named {title} is already in game {game_title}.")
         return
 
     try:
@@ -130,9 +130,7 @@ def _trade_stock_helper(title, game_title, ticker, shares):
 # TODO:combining sellholding and buyholding
 def _buy_stock_helper(portfolio, ticker, shares):
     portfolio.buyHolding(ticker, shares)
-    print(
-        f"Portfolio id={portfolio.id} purchased {shares} shares of {ticker}"
-    )
+    print(f"Portfolio id={portfolio.id} purchased {shares} shares of {ticker}")
 
 
 # TODO:combining sellholding and buyholding
