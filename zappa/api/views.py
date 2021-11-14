@@ -43,9 +43,10 @@ def handle_games(request):
         _create_game_helper(request.data)
         return Response()
     elif request.method == DELETE_METHOD:
-        return Response(_delete_game_helper())
+        return Response(_delete_game_helper(request.data))
 
 
+# TODO:support multiple games
 def _get_game_standings_helper():
     game = Game.objects.all()
     if len(game) <= 0:
@@ -58,6 +59,11 @@ def _get_game_standings_helper():
 
 
 def _create_game_helper(data):
+    # title is a unique field
+    if Game.objects.filter(title=data.get("title")).exists():
+        print("game with same name existed")
+        return
+
     game = Game.objects.create()
     game.title = data.get("title")
     game.rules = data.get("rules")
@@ -67,10 +73,17 @@ def _create_game_helper(data):
     print("Successfully created new game")
 
 
-def _delete_game_helper():
-    response = _get_game_standings_helper()
-    # TODO: delete game
-    return response
+def _delete_game_helper(data):
+    try:
+        game = Game.objects.get(data.get("title"))
+        game.delete()
+        print(f"Successfully deleted game {game.title}")
+    except Game.DoesNotExist:
+        print(
+            "Could not find game with name {}.".format(
+                data.get("title")
+            )
+        )
 
 
 @api_view(["GET", "POST"])
@@ -100,16 +113,14 @@ def _get_portfolio_pk_helper(portfolio_id):
 
 
 def _delete_portfolio_pk_helper(portfolio_id):
-    game = Game.objects.all()[0]  # Assumes there is only one game
     try:
-        portfolio = Portfolio.objects.get(id=id, game=game)
-        portfolio.game = None
-        portfolio.save()
+        portfolio = Portfolio.objects.get(id=portfolio_id)
+        portfolio.delete()
         print(f"Successfully deleted portfolio with id={portfolio_id}")
     except Portfolio.DoesNotExist:
         print(
-            "Could not find portfolio ID {} in game {}.".format(
-                portfolio_id, game.title
+            "Could not find portfolio ID {}.".format(
+                portfolio_id
             )
         )
 
@@ -124,7 +135,26 @@ def _get_portfolio_helper():
 
 
 def _post_portfolio_helper(data):
-    game = Game.objects.all()[0]  # Assumes there is only one game
+    game = None
+
+    try:
+        game = Game.objects.get(title=data.get("gameTitle"))
+    except Game.DoesNotExist:
+        print(
+            "Could not find game with name {}.".format(
+                data.get("gameTitle")
+            )
+        )
+        return
+
+    if Portfolio.objects.filter(title=data.get("title"), game=game).exists():
+        print(
+            "Portfolio named {} is already in game {}.".format(
+                data.get("title"), data.get("gameTitle")
+            )
+        )
+        return
+
     portfolio = Portfolio.objects.create()
     portfolio.game = game
     portfolio.cash_balance = float(game.startingBalance)

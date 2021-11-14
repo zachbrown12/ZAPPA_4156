@@ -16,6 +16,7 @@ pip install djangorestframework<br/>
 To run the app:<br/>
 1. migrate <br/>
 python .\zappa\manage.py migrate <br/>
+python .\zappa\manage.py makemigrations trade_simulation
 python .\zappa\manage.py makemigrations <br/>
 python .\zappa\manage.py migrate <br/>
 
