@@ -16,7 +16,7 @@ class Game(models.Model):
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 
-    def rankPortfolios(self):
+    def rank_portfolios(self):
         portfolios = Portfolio.objects.filter(game=self)
         for portfolio in portfolios:
             portfolio.computeTotalValue()
@@ -58,12 +58,12 @@ class Portfolio(models.Model):
             value += holding.market_value()
         return value
 
-    def computeTotalValue(self):
+    def compute_total_value(self):
         self.total_value = self.equity_value() + float(self.cash_balance)
         self.save()
 
     # Create a transaction record
-    def addTransaction(self, ticker, shares, price, type):
+    def add_transaction(self, ticker, shares, price, type):
         transaction = Transaction.objects.create()
         transaction.portfolio = self
         transaction.ticker = ticker
@@ -73,8 +73,7 @@ class Portfolio(models.Model):
         transaction.save()
 
     # Buy <shares> shares of stock <ticker>
-    def buyHolding(self, ticker, shares):
-
+    def buy_holding(self, ticker, shares):
         holding, created = Holding.objects.get_or_create(portfolio=self, ticker=ticker)
 
         price = holding.askprice()
@@ -96,8 +95,7 @@ class Portfolio(models.Model):
         self.addTransaction(ticker, shares, price, "Buy")
 
     # Sell <shares> shares of stock <ticker>
-    def sellHolding(self, ticker, shares):
-
+    def sell_holding(self, ticker, shares):
         holding = Holding.objects.get(portfolio=self, ticker=ticker)
         if not holding:
             print("Holding {} is not in portfolio.".format(ticker))
@@ -139,7 +137,7 @@ class Holding(models.Model):
         return self.ticker
 
     # Get the ask price (what you can buy immediately for)
-    def askprice(self):
+    def ask_price(self):
         stockInfo = Ticker(str(self.ticker)).info
         if "ask" not in stockInfo:
             return None
@@ -148,7 +146,7 @@ class Holding(models.Model):
         return stockInfo["ask"]
 
     # Get the bid price (what you can sell immediately for)
-    def bidprice(self):
+    def bid_price(self):
         stockInfo = Ticker(str(self.ticker)).info
         if "bid" not in stockInfo:
             return None
