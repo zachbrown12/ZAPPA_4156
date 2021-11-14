@@ -23,21 +23,23 @@ python .\zappa\manage.py migrate <br/>
 python .\zappa\manage.py runserver<br/>
   
 To use the service:<br/>
-
-   http://127.0.0.1:8000/api/newgame/ -- Creates a new game. Takes optional data for "title", "rules", and "starting_balance". <br/>
-   http://127.0.0.1:8000/api/addnewportfolio/<i>game_id</i> -- Adds a new portfolio to the game with ID <i>game_id</i>. Takes optional data for "title".<br/>
-   http://127.0.0.1:8000/api/addexistingportfolio/<i>game_id</i> -- Adds an existing portfolio with ID "portfolio_id" to the game with ID <i>game_id</i>. Requires data for "portfolio_id".<br/>
-   http://127.0.0.1:8000/api/removeportfolio/<i>game_id</i> -- Removes the portfolio with ID "portfolio_id" from the game with ID <i>game_id</i>. Requires data for "portfolio_id".<br/>
-   http://127.0.0.1:8000/api/games/<i>game_id</i> -- Returns the current status of the game with ID <i>game_id</i> and the portfolios within, including the values and rankings of its portfolios using stock bid prices at the time called.<br/>
-   http://127.0.0.1:8000/api/games/ -- Returns the current status of all games and the portfolios within, including the values and rankings of portfolios within each game using stock bid prices at the time called.<br/>   
+  
+Using the resource path http://127.0.0.1:8000/,
+  
+<b>POST</b>   /api/newgame/ -- Creates a new game. Takes optional parameters "title", "rules", and "starting_balance". <br/>
+<b>POST</b>   /api/addnewportfolio/{game_id} -- Adds a new portfolio to the game with ID {game_id}. Takes optional parameter "title".<br/>
+<b>POST</b>   /api/addexistingportfolio/{game_id} -- Adds an existing portfolio with ID "portfolio_id" to the game with ID {game_id}. Requires parameter "portfolio_id".<br/>
+<b>POST</b>   /api/removeportfolio/{game_id} -- Removes the portfolio with ID "portfolio_id" from the game with ID {game_id}. Requires parameter "portfolio_id".<br/>
+<b>GET</b>   /api/games/{game_id} -- Returns the current status of the game with ID {game_id} and the portfolios within, including the values and rankings of its portfolios using stock bid prices at the time called.<br/>
+<b>GET</b>   /api/games/ -- Returns the current status of all games and the portfolios within, including the values and rankings of portfolios within each game using stock bid prices at the time called.<br/>   
    
-   http://127.0.0.1:8000/api/portfolios/ -- Returns the current status of all portfolios, including the current value of each using stock bid prices at the time called.<br/>
-   http://127.0.0.1:8000/api/portfolio/<i>portfolio_id</i> -- Returns the current status of the portfolio with ID <i>portfolio_id</i>, including its current value using stock bid prices at the time called.<br/>
-   http://127.0.0.1:8000/api/newportfolio/ -- Creates a new portfolio without assigning it to a game. Takes optional data for "title".<br/>
-   http://127.0.0.1:8000/api/buystock/<i>portfolio_id</i> -- Buys "shares" shares of the stock with ticker "ticker" at its current ask price, adds it to the portfolio with ID <i>portfolio_id</i>, and deducts the cost from the portfolio's cash_balance. Requires data for "ticker" and "shares".<br/>
-   http://127.0.0.1:8000/api/sellstock/<i>portfolio_id</i> -- Sells "shares" shares of the stock with ticker "ticker" at its current bid price, removes those shares from the portfolio with ID <i>portfolio_id</i>, and adds the proceeds to the portfolio's cash_balance. Requires data for "ticker" and "shares".<br/>
+<b>GET</b>   /api/portfolios/ -- Returns the current status of all portfolios, including the current value of each using stock bid prices at the time called.<br/>
+<b>GET</b>   /api/portfolio/{portfolio_id} -- Returns the current status of the portfolio with ID {portfolio_id}, including its current value using stock bid prices at the time called.<br/>
+<b>POST</b>   /api/newportfolio/ -- Creates a new portfolio without assigning it to a game. Takes optional parameter "title".<br/>
+<b>POST</b>   /api/buystock/{portfolio_id} -- Buys "shares" shares of the stock with ticker "ticker" at its current ask price, adds it to the portfolio with ID {portfolio_id}, and deducts the cost from the portfolio's cash_balance. Requires parameters "ticker" and "shares".<br/>
+<b>POST</b>   /api/sellstock/{portfolio_id} -- Sells "shares" shares of the stock with ticker "ticker" at its current bid price, removes those shares from the portfolio with ID {portfolio_id}, and adds the proceeds to the portfolio's cash_balance. Requires parameters "ticker" and "shares".<br/>
    
-   http://127.0.0.1:8000/api/holdings/ -- Returns all stock holdings in the database.<br/>
-   http://127.0.0.1:8000/api/holdings/<i>holding_id</i> -- Returns the holding with ID <i>holding_id</i>.<br/>
-   http://127.0.0.1:8000/api/transactions/ -- Returns a list of all transaction records in the database.<br/>
-   http://127.0.0.1:8000/api/transactions/<i>transaction_record</i> -- Returns the transaction record with ID <i>transaction_record</i>.<br/>
+<b>GET</b>   /api/holdings/ -- Returns all stock holdings in the database.<br/>
+<b>GET</b>   /api/holdings/{holding_id} -- Returns the holding with ID {holding_id}.<br/>
+<b>GET</b>   /api/transactions/ -- Returns a list of all transaction records in the database.<br/>
+<b>GET</b>   /api/transactions/{transaction_record} -- Returns the transaction record with ID {transaction_record}.<br/>
