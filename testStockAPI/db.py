@@ -91,7 +91,7 @@ def buy_stock(accountname, ticker, cash):
             portfolio = loads(row[2])
         except JSONDecodeError:
             portfolio = {}
-        price = Stockdata(ticker).askPrice()
+        price = Stockdata(ticker).ask_price()
         if price is None:
             raise ValueError("Ticker {} is not available.".format(ticker))
         if price == 0:
@@ -135,7 +135,7 @@ def sell_stock(accountname, ticker, shares):
                     accountname, shares, ticker
                 )
             )
-        price = Stockdata(ticker).bidPrice()
+        price = Stockdata(ticker).bid_price()
         if price is None:
             raise ValueError("Ticker {} is not available.".format(ticker))
         if price == 0:
@@ -153,17 +153,3 @@ def sell_stock(accountname, ticker, shares):
         if con:
             con.commit()
             con.close()
-
-
-delete_table()
-create_table()
-add_account("test_account", 1000.0)
-
-buy_stock("test_account", "aapl", 100.0)
-print(get_account("test_account"))
-buy_stock("test_account", "aapl", 50.0)
-print(get_account("test_account"))
-buy_stock("test_account", "tsla", 100.0)
-print(get_account("test_account"))
-sell_stock("test_account", "AAPL", 0.5)
-print(get_account("test_account"))
