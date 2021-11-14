@@ -163,7 +163,7 @@ class Transaction(models.Model):
         Portfolio, null=True, blank=True, on_delete=models.CASCADE
     )
     ticker = models.TextField(max_length=200)
-    tradeType = models.TextField(max_length=200)
+    trade_type = models.TextField(max_length=200)
     shares = models.DecimalField(
         max_digits=14, decimal_places=2, default=0.00, null=True
     )
