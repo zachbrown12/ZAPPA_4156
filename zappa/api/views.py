@@ -51,7 +51,7 @@ def _get_game_standings_helper():
     if len(game) <= 0:
         return None
     game = game[0]  # Assumes only one game at a time
-    game.rankPortfolios()
+    game.rank_portfolios()
     serializer = GameSerializer(game, many=False)
     print(f"Returning game standings: {serializer.data}")
     return serializer.data
@@ -66,8 +66,8 @@ def _create_game_helper(data):
     game = Game.objects.create()
     game.title = data.get("title")
     game.rules = data.get("rules")
-    if data.get("startingBalance"):
-        game.startingBalance = float(data.get("startingBalance"))
+    if data.get("starting_balance"):
+        game.starting_balance = float(data.get("starting_balance"))
     game.save()
     print("Successfully created new game")
 
@@ -104,18 +104,18 @@ def handle_portfolio_pk(request, pk):
 
 
 def _get_portfolio_pk_helper(portfolio_id):
-    portfolio = Portfolio.objects.get(id=portfolio_id)
-    portfolio.computeTotalValue()
+    portfolio = Portfolio.objects.get(uid=portfolio_id)
+    portfolio.compute_total_value()
     serializer = PortfolioSerializer(portfolio, many=False)
-    print(f"Fetched portfolio with id={portfolio_id}: {serializer.data}")
+    print(f"Fetched portfolio with uid={portfolio_id}: {serializer.data}")
     return serializer.data
 
 
 def _delete_portfolio_pk_helper(portfolio_id):
     try:
-        portfolio = Portfolio.objects.get(id=portfolio_id)
+        portfolio = Portfolio.objects.get(uid=portfolio_id)
         portfolio.delete()
-        print(f"Successfully deleted portfolio with id={portfolio_id}")
+        print(f"Successfully deleted portfolio with uid={portfolio_id}")
     except Portfolio.DoesNotExist:
         print(
             "Could not find portfolio ID {}.".format(
@@ -127,7 +127,7 @@ def _delete_portfolio_pk_helper(portfolio_id):
 def _get_portfolio_helper():
     portfolios = Portfolio.objects.all()
     for portfolio in portfolios:
-        portfolio.computeTotalValue()
+        portfolio.compute_total_value()
     serializer = PortfolioSerializer(portfolios, many=True)
     print(f"Successfullly fetched all portfolios: {serializer.data}")
     return serializer.data
@@ -156,8 +156,8 @@ def _post_portfolio_helper(data):
 
     portfolio = Portfolio.objects.create()
     portfolio.game = game
-    portfolio.cash_balance = float(game.startingBalance)
-    portfolio.total_value = float(game.startingBalance)
+    portfolio.cash_balance = float(game.starting_balance)
+    portfolio.total_value = float(game.starting_balance)
     portfolio.title = data.get("title")
     portfolio.save()
     print(f"Successfully created new portfolio with title={data.get('title')}")
@@ -181,18 +181,18 @@ def _trade_stock_helper(portfolio_id, data):
 
 def _buy_stock_helper(portfolio_id, data):
     ticker = data.get("ticker")
-    portfolio = Portfolio.objects.get(id=portfolio_id)
-    portfolio.buyHolding(ticker, data.get("shares"))
+    portfolio = Portfolio.objects.get(uid=portfolio_id)
+    portfolio.buy_holding(ticker, data.get("shares"))
     print(
-        f"Portfolio id={portfolio_id} purchased {data.get('shares')} shares of {ticker}"
+        f"Portfolio uid={portfolio_id} purchased {data.get('shares')} shares of {ticker}"
     )
 
 
 def _sell_stock_helper(portfolio_id, data):
     ticker = data.get("ticker")
-    portfolio = Portfolio.objects.get(id=portfolio_id)
+    portfolio = Portfolio.objects.get(uid=portfolio_id)
     portfolio.sellHolding(ticker, -data.get("shares"))
-    print(f"Portfolio id={portfolio_id} sold {data.get('shares')} shares of {ticker}")
+    print(f"Portfolio uid={portfolio_id} sold {data.get('shares')} shares of {ticker}")
 
 
 @api_view(["GET"])
@@ -205,12 +205,12 @@ def handle_holdings(request):
 @api_view(["GET"])
 def handle_holding(request, pk):
     try:
-        holding = Holding.objects.get(id=pk)
+        holding = Holding.objects.get(uid=pk)
         serializer = HoldingSerializer(holding, many=False)
-        print(f"Successfully fetched holding id={pk}: {serializer.data}")
+        print(f"Successfully fetched holding uid={pk}: {serializer.data}")
         return Response(serializer.data)
     except Holding.DoesNotExist:
-        print(f"Cannt fetched holding id={pk}")
+        print(f"Cannot fetch holding uid={pk}")
         return
 
 
@@ -224,7 +224,7 @@ def handle_transactions(request):
 
 @api_view(["GET"])
 def handle_transaction(request, pk):
-    transaction = Transaction.objects.get(id=pk)
+    transaction = Transaction.objects.get(uid=pk)
     serializer = TransactionSerializer(transaction, many=False)
     print(f"Successfully fetched transaction: {serializer.data}")
     return Response(serializer.data)

@@ -6,23 +6,23 @@ from yfinance import Ticker
 
 class Game(models.Model):
     title = models.TextField(max_length=200, unique=True)
-    startingBalance = models.DecimalField(
+    starting_balance = models.DecimalField(
         max_digits=14, decimal_places=2, default=10000.00
     )
     rules = models.TextField(max_length=200)
     winner = models.CharField(max_length=200, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
-    id = models.UUIDField(
+    uid = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 
     def __str__(self):
         return self.title
 
-    def rankPortfolios(self):
+    def rank_portfolios(self):
         portfolios = Portfolio.objects.filter(game=self)
         for portfolio in portfolios:
-            portfolio.computeTotalValue()
+            portfolio.compute_total_value()
         leaderboard = sorted(portfolios, key=lambda p: p.total_value, reverse=True)
         print(leaderboard)
         for i in range(len(leaderboard)):
@@ -45,7 +45,7 @@ class Portfolio(models.Model):
     )
     total_value = models.DecimalField(max_digits=14, decimal_places=2, default=10000.00)
     created_on = models.DateTimeField(auto_now_add=True)
-    id = models.UUIDField(
+    uid = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 
@@ -64,26 +64,24 @@ class Portfolio(models.Model):
             value += holding.market_value()
         return value
 
-    def computeTotalValue(self):
+    def compute_total_value(self):
         self.total_value = self.equity_value() + float(self.cash_balance)
         self.save()
 
     # Create a transaction record
-    def addTransaction(self, ticker, shares, price, type):
+    def add_transaction(self, ticker, shares, price, type):
         transaction = Transaction.objects.create()
         transaction.portfolio = self
         transaction.ticker = ticker
-        transaction.tradeType = type
+        transaction.trade_type = type
         transaction.shares = shares
         transaction.bought_price = price
         transaction.save()
 
     # Buy <shares> shares of stock <ticker>
-    def buyHolding(self, ticker, shares):
-
+    def buy_holding(self, ticker, shares):
         holding, created = Holding.objects.get_or_create(portfolio=self, ticker=ticker)
-
-        price = holding.askprice()
+        price = holding.ask_price()
         if price is None:
             print("Ticker {} is not currently traded.".format(ticker))
             return
@@ -99,24 +97,24 @@ class Portfolio(models.Model):
         self.cash_balance = float(self.cash_balance) - cost
         self.save()
 
-        self.addTransaction(ticker, shares, price, "Buy")
+        self.add_transaction(ticker, shares, price, "Buy")
 
     # Sell <shares> shares of stock <ticker>
-    def sellHolding(self, ticker, shares):
+    def sell_holding(self, ticker, shares):
 
         holding = Holding.objects.get(portfolio=self, ticker=ticker)
         if not holding:
             print("Holding {} is not in portfolio.".format(ticker))
             return
-        price = holding.bidprice()
+        price = holding.bid_price()
         if price is None:
             print("Ticker {} is not currently traded.".format(ticker))
             return
-        currentshares = float(0 if holding.shares is None else holding.shares)
-        if currentshares < float(shares):
+        current_shares = float(0 if holding.shares is None else holding.shares)
+        if current_shares < float(shares):
             print("Not enough shares of {} to sell {}.".format(ticker, float(shares)))
             return
-        holding.shares = currentshares - float(shares)
+        holding.shares = current_shares - float(shares)
         if holding.shares == 0.0:
             holding.delete()
         else:
@@ -125,7 +123,7 @@ class Portfolio(models.Model):
         self.cash_balance = float(self.cash_balance) + (price * float(shares))
         self.save()
 
-        self.addTransaction(ticker, shares, price, "Sell")
+        self.add_transaction(ticker, shares, price, "Sell")
 
 
 class Holding(models.Model):
@@ -137,7 +135,7 @@ class Holding(models.Model):
         max_digits=14, decimal_places=2, default=0.00, null=True
     )
     created_on = models.DateTimeField(auto_now_add=True)
-    id = models.UUIDField(
+    uid = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 
@@ -145,25 +143,25 @@ class Holding(models.Model):
         return self.ticker
 
     # Get the ask price (what you can buy immediately for)
-    def askprice(self):
-        stockInfo = Ticker(str(self.ticker)).info
-        if "ask" not in stockInfo:
+    def ask_price(self):
+        stock_info = Ticker(str(self.ticker)).info
+        if not stock_info.get("ask"):
             return None
-        if stockInfo["ask"] == 0:
-            return stockInfo["regularMarketPrice"]
-        return stockInfo["ask"]
+        if stock_info.get("ask") == 0:
+            return stock_info.get("regularMarketPrice")
+        return stock_info.get("ask")
 
     # Get the bid price (what you can sell immediately for)
-    def bidprice(self):
-        stockInfo = Ticker(str(self.ticker)).info
-        if "bid" not in stockInfo:
+    def bid_price(self):
+        stock_info = Ticker(str(self.ticker)).info
+        if not stock_info.get("bid"):
             return None
-        if stockInfo["bid"] == 0:
-            return stockInfo["regularMarketPrice"]
-        return stockInfo["bid"]
+        if stock_info.get("bid") == 0:
+            return stock_info.get("regularMarketPrice")
+        return stock_info.get("bid")
 
     def market_value(self):
-        return self.bidprice() * float(self.shares)
+        return self.bid_price() * float(self.shares)
 
 
 class Transaction(models.Model):
@@ -171,13 +169,13 @@ class Transaction(models.Model):
         Portfolio, null=True, blank=True, on_delete=models.CASCADE
     )
     ticker = models.TextField(max_length=200)
-    tradeType = models.TextField(max_length=200)
+    trade_type = models.TextField(max_length=200)
     shares = models.DecimalField(
         max_digits=14, decimal_places=2, default=0.00, null=True
     )
     bought_price = models.DecimalField(max_digits=14, decimal_places=2, default=0.00)
     created_on = models.DateTimeField(auto_now_add=True)
-    id = models.UUIDField(
+    uid = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 

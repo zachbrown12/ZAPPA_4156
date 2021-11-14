@@ -9,13 +9,13 @@ class Stockdata:
             self.valid = False
 
     # Get the ask price (what you can buy immediately for)
-    def askPrice(self):
+    def ask_price(self):
         if not self.valid:
             return None
-        return self.stock["ask"]
+        return self.stock.get("ask")
 
     # Get the bid price (what you can sell immediately for)
-    def bidPrice(self):
+    def bid_price(self):
         if not self.valid:
             return None
-        return self.stock["bid"]
+        return self.stock.get("bid")
