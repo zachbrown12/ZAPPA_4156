@@ -10,7 +10,7 @@ from trade_simulation.models import Game, Portfolio, Holding, Transaction
 
 GET_METHOD = "GET"
 POST_METHOD = "POST"
-DELETE_METHOD = "DELETe"
+DELETE_METHOD = "DELETE"
 
 
 @api_view(["GET"])
