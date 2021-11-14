@@ -10,22 +10,28 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class GameSerializer(serializers.ModelSerializer):
+    portfolios = serializers.SerializerMethodField()
+
     class Meta:
         model = Game
         fields = "__all__"
+
+    def get_portfolios(self, obj):
+        portfolios = obj.portfolio_set.all()
+        serializer = PortfolioSerializer(portfolios, many=True)
+        return serializer.data
 
 
 class HoldingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Holding
         fields = '__all__'
-        
-        
+
+
 class PortfolioSerializer(serializers.ModelSerializer):
     owner = UserSerializer(many=False)
-    game = GameSerializer(many=False)
     holdings = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Portfolio
         fields = "__all__"
@@ -35,11 +41,8 @@ class PortfolioSerializer(serializers.ModelSerializer):
         serializer = HoldingSerializer(holdings, many=True)
         return serializer.data
 
-      
-class TransactionSerializer(serializers.ModelSerializer):
-    portfolio = PortfolioSerializer(many=False)
-    holding = HoldingSerializer(many=False)
 
+class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = "__all__"
