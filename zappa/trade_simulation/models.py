@@ -5,7 +5,7 @@ from yfinance import Ticker
 
 
 class Game(models.Model):
-    title = models.TextField(max_length=200)
+    title = models.TextField(max_length=200, unique=True)
     starting_balance = models.DecimalField(
         max_digits=14, decimal_places=2, default=10000.00
     )
@@ -15,6 +15,9 @@ class Game(models.Model):
     uid = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
+
+    def __str__(self):
+        return self.title
 
     def rank_portfolios(self):
         portfolios = Portfolio.objects.filter(game=self)
@@ -45,6 +48,9 @@ class Portfolio(models.Model):
     uid = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
+
+    class Meta:
+        unique_together = ('title', 'game',)
 
     def __str__(self):
         return self.title
