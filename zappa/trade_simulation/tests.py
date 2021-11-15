@@ -1,27 +1,53 @@
 from django.test import TestCase
-from . import Game, Portfolio, Holding, Transaction
+from .models import Game, Portfolio, Holding, Transaction
 from django.contrib.auth.models import User
 
 
 class GameTestCase(TestCase):
     def setUp(self):
-        Game.objects.create(title="Test Game", startingBalance=5000, rules="test rules")
-        """
-        for i in range(3):
-            Portfolio.objects.create()
-        """
+        Game.objects.create(
+            title="Test Game", starting_balance=5000, rules="test rules"
+        )
 
-    def test_rank_portfolios(self):
-        """Portfolios for a game are correctly ordered"""
-        # pass
+    def test_rank_portfolios_tie(self):
+        """
+        Test that portfolios for a game are correctly ordered when all portfolios have the same value
+        """
+        game = Game.objects.all()[0]
+        for i in range(3):
+            Portfolio.objects.create(title=f"Test Portfolio {i}", game=game)
+        leaderboard = game.rank_portfolios()
+        assert len(leaderboard) == 3
+        assert (
+            leaderboard[0].game_rank == 1
+            and leaderboard[1].game_rank == 1
+            and leaderboard[2].game_rank == 1
+        )
+
+    def test_rank_portfolios_no_tie(self):
+        """
+        Test that portfolios for a game are correctly ordered when portfolios have different values
+        """
+        game = Game.objects.all()[0]
+        for i in range(3):
+            cash_balance = (i + 1) * 1000
+            Portfolio.objects.create(
+                title=f"Test Portfolio {i}", game=game, cash_balance=cash_balance
+            )
+
+        leaderboard = game.rank_portfolios()
+        assert len(leaderboard) == 3
+        assert leaderboard[0].game_rank == 1
+        assert leaderboard[1].game_rank == 2
+        assert leaderboard[2].game_rank == 3
 
 
 class PortfolioTestCase(TestCase):
     def setUp(self):
         Game.objects.create(title="Test Game", rules="test rules")
-        User.objects.create()  # TODO: fix user creation
-        game_id = ""  # TODO: game id?
-        Portfolio.objects.create(title="Test portfolio", game=game_id)
+        game = Game.objects.all()[0]
+        Portfolio.objects.create(title="Test portfolio", game=game)
+        # portfolio = Portfolio.objects.all()[0]
 
     def test_equity_value(self):
         """Test that equity_value is computed correctly for a portfolio"""

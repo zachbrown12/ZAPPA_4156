@@ -23,8 +23,8 @@ class Game(models.Model):
         portfolios = Portfolio.objects.filter(game=self)
         for portfolio in portfolios:
             portfolio.compute_total_value()
+
         leaderboard = sorted(portfolios, key=lambda p: p.total_value, reverse=True)
-        print(leaderboard)
         for i in range(len(leaderboard)):
             if (i > 0) and (
                 leaderboard[i].total_value == leaderboard[i - 1].total_value
@@ -33,12 +33,13 @@ class Game(models.Model):
             else:
                 leaderboard[i].game_rank = i + 1
             leaderboard[i].save()
+        return leaderboard
 
 
 class Portfolio(models.Model):
     owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     game = models.ForeignKey(Game, null=True, blank=True, on_delete=models.CASCADE)
-    game_rank = models.IntegerField(null=True, blank=True)
+    game_rank = models.IntegerField(default=1)
     title = models.TextField(max_length=200)
     cash_balance = models.DecimalField(
         max_digits=14, decimal_places=2, default=10000.00
@@ -50,7 +51,7 @@ class Portfolio(models.Model):
     )
 
     class Meta:
-        unique_together = ('title', 'game',)
+        unique_together = ("title", "game")
 
     def __str__(self):
         return self.title
