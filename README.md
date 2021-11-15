@@ -35,7 +35,7 @@ python .\zappa\manage.py runserver<br/>
 Using the resource path http://127.0.0.1:8000/, the following methods are available:<br/>
 
 <h4>Games</h4>
-Each Game contains Portfolios that compete against each other to attain the highest value. A Game has a "title", "rules", a "starting balance" that all portfolios within the game are initialized with, and a "winner" to be determined.<br/><br/>
+Each Game contains Portfolios that compete against each other to attain the highest value. A Game has a "title", "rules", a "starting_balance" that all portfolios within the game are initialized with, and a "winner" to be determined.<br/><br/>
 
 <b>GET</b>   /api/games/ -- Returns the current status of all games and the portfolios within, including the values and rankings of portfolios within each game, using stock bid prices at the time called.<br/>
 <b>GET</b>   /api/game/{game_title} -- Returns the current status of the game with title {game_title} and the portfolios within, including the values and rankings of its portfolios, using stock bid prices at the time called.<br/>
