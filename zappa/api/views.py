@@ -25,6 +25,7 @@ def getRoutes(request):
 
     routes = [
         {"GET": "/api/games"},
+        {"GET": "/api/game/game_title"},
         {"POST": "/api/game/game_title"},
         {"DELETE": "/api/game/game_title"},
         {"GET": "/api/portfolios"},
@@ -33,9 +34,9 @@ def getRoutes(request):
         {"DELETE": "/api/portfolio/game_title/port_title"},
         {"POST": "/api/portfolio/trade"},
         {"GET": "/api/holdings"},
-        {"GET": "/api/holding/game_title/port_title/ticker"},
+        {"GET": "/api/holding/port_title/game_title/ticker"},
         {"GET": "/api/transactions"},
-        {"GET": "/api/transaction/id"},
+        {"GET": "/api/transaction/uid"},
     ]
 
     return Response(routes)
@@ -138,7 +139,7 @@ def handle_transactions(request):
 
 @api_view(["GET"])
 def handle_transaction(request, pk):
-    transaction = Transaction.objects.get(id=pk)
+    transaction = Transaction.objects.get(uid=pk)
     serializer = TransactionSerializer(transaction, many=False)
     print(f"Successfully fetched transaction: {serializer.data}")
     return Response(serializer.data)
