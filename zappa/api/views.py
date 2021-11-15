@@ -1,12 +1,25 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import (
-    GameSerializer,
-    PortfolioSerializer,
     HoldingSerializer,
     TransactionSerializer,
 )
 from trade_simulation.models import Game, Portfolio, Holding, Transaction
+from .helpers import (
+    _get_game_standings_helper,
+
+    _get_game_helper,
+    _create_game_helper,
+    _delete_game_helper,
+
+    _get_portfolios_helper,
+    _get_portfolio_helper,
+    _post_portfolio_helper,
+    _delete_portfolio_helper,
+
+    _trade_stock_helper,
+    _get_holding_helper
+)
 
 GET_METHOD = "GET"
 POST_METHOD = "POST"
@@ -18,15 +31,20 @@ def getRoutes(request):
 
     routes = [
         {"GET": "/api/games"},
-        {"POST": "/api/games"},
-        {"DELETE": "/api/games"},
-        {"GET": "/api/portfolios/"},
-        {"POST": "/api/portfolios/"},
-        {"GET": "/api/portfolio/portfolio_id"},
-        {"DELETE": "/api/portfolio/portfolio_id"},
-        {"POST": "/api/portfolio/portfolio_id/trade"},
+        {"POST": "/api/game/game_title"},
+        {"DELETE": "/api/game/game_title"},
+
+        {"GET": "/api/portfolios"},
+
+        {"GET": "/api/portfolio/game_title/port_title"},
+        {"POST": "/api/portfolio/game_title/port_title"},
+        {"DELETE": "/api/portfolio/game_title/port_title"},
+
+        {"POST": "/api/portfolio/trade"},
+
         {"GET": "/api/holdings"},
-        {"GET": "/api/holding/id"},
+        {"GET": "/api/holding/game_title/port_title/ticker"},
+
         {"GET": "/api/transactions"},
         {"GET": "/api/transaction/id"},
     ]
@@ -34,165 +52,51 @@ def getRoutes(request):
     return Response(routes)
 
 
-@api_view(["GET", "POST", "DELETE"])
+@api_view(["GET"])
 def handle_games(request):
+    return Response(_get_game_standings_helper())
+
+
+@api_view(["GET", "POST", "DELETE"])
+def handle_game(request, game_title):
     if request.method == GET_METHOD:
-        return Response(_get_game_standings_helper())
+        return Response(_get_game_helper(game_title))
     elif request.method == POST_METHOD:
-        _create_game_helper(request.data)
+        rules = request.data.get("rules")
+        startingBalance = request.data.get("startingBalance", None)
+        _create_game_helper(game_title, rules, startingBalance)
         return Response()
     elif request.method == DELETE_METHOD:
-        return Response(_delete_game_helper(request.data))
+        return Response(_delete_game_helper(game_title))
 
 
-# TODO:support multiple games
-def _get_game_standings_helper():
-    game = Game.objects.all()
-    if len(game) <= 0:
-        return None
-    game = game[0]  # Assumes only one game at a time
-    game.rank_portfolios()
-    serializer = GameSerializer(game, many=False)
-    print(f"Returning game standings: {serializer.data}")
-    return serializer.data
-
-
-def _create_game_helper(data):
-    # title is a unique field
-    if Game.objects.filter(title=data.get("title")).exists():
-        print("game with same name existed")
-        return
-
-    game = Game.objects.create()
-    game.title = data.get("title")
-    game.rules = data.get("rules")
-    if data.get("starting_balance"):
-        game.starting_balance = float(data.get("starting_balance"))
-    game.save()
-    print("Successfully created new game")
-
-
-def _delete_game_helper(data):
-    try:
-        game = Game.objects.get(data.get("title"))
-        game.delete()
-        print(f"Successfully deleted game {game.title}")
-    except Game.DoesNotExist:
-        print(
-            "Could not find game with name {}.".format(
-                data.get("title")
-            )
-        )
-
-
-@api_view(["GET", "POST"])
+@api_view(["GET"])
 def handle_portfolios(request):
+    return Response(_get_portfolios_helper())
+
+
+@api_view(["GET", "POST", "DELETE"])
+def handle_portfolio(request, game_title, port_title):
     if request.method == GET_METHOD:
-        return Response(_get_portfolio_helper())
+        return Response(_get_portfolio_helper(port_title, game_title))
     elif request.method == POST_METHOD:
-        _post_portfolio_helper(request.data)
+        _post_portfolio_helper(port_title, game_title)
         return Response()
-
-
-@api_view(["GET", "DELETE"])
-def handle_portfolio_pk(request, pk):
-    if request.method == GET_METHOD:
-        return Response(_get_portfolio_pk_helper(pk))
     elif request.method == DELETE_METHOD:
-        _delete_portfolio_pk_helper(pk)
+        _delete_portfolio_helper(port_title, game_title)
         return Response()
-
-
-def _get_portfolio_pk_helper(portfolio_id):
-    portfolio = Portfolio.objects.get(uid=portfolio_id)
-    portfolio.compute_total_value()
-    serializer = PortfolioSerializer(portfolio, many=False)
-    print(f"Fetched portfolio with uid={portfolio_id}: {serializer.data}")
-    return serializer.data
-
-
-def _delete_portfolio_pk_helper(portfolio_id):
-    try:
-        portfolio = Portfolio.objects.get(uid=portfolio_id)
-        portfolio.delete()
-        print(f"Successfully deleted portfolio with uid={portfolio_id}")
-    except Portfolio.DoesNotExist:
-        print(
-            "Could not find portfolio ID {}.".format(
-                portfolio_id
-            )
-        )
-
-
-def _get_portfolio_helper():
-    portfolios = Portfolio.objects.all()
-    for portfolio in portfolios:
-        portfolio.compute_total_value()
-    serializer = PortfolioSerializer(portfolios, many=True)
-    print(f"Successfullly fetched all portfolios: {serializer.data}")
-    return serializer.data
-
-
-def _post_portfolio_helper(data):
-    game = None
-
-    try:
-        game = Game.objects.get(title=data.get("gameTitle"))
-    except Game.DoesNotExist:
-        print(
-            "Could not find game with name {}.".format(
-                data.get("gameTitle")
-            )
-        )
-        return
-
-    if Portfolio.objects.filter(title=data.get("title"), game=game).exists():
-        print(
-            "Portfolio named {} is already in game {}.".format(
-                data.get("title"), data.get("gameTitle")
-            )
-        )
-        return
-
-    portfolio = Portfolio.objects.create()
-    portfolio.game = game
-    portfolio.cash_balance = float(game.starting_balance)
-    portfolio.total_value = float(game.starting_balance)
-    portfolio.title = data.get("title")
-    portfolio.save()
-    print(f"Successfully created new portfolio with title={data.get('title')}")
 
 
 @api_view(["POST"])
-def trade(request, pk):
+def trade(request):
     securityType = request.data.get("securityType")
     if securityType == "stock":
-        _trade_stock_helper(pk, request.data)
+        portfolio_title = request.data.get("portfolioTitle")
+        game_title = request.data.get("gameTitle")
+        ticker = request.data.get("ticker")
+        shares = request.data.get("shares")
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
     return Response()
-
-
-def _trade_stock_helper(portfolio_id, data):
-    shares = data.get("shares")
-    if shares > 0:
-        _buy_stock_helper(portfolio_id, data)
-    elif shares < 0:
-        _sell_stock_helper(portfolio_id, data)
-
-
-def _buy_stock_helper(portfolio_id, data):
-    ticker = data.get("ticker")
-    portfolio = Portfolio.objects.get(uid=portfolio_id)
-    portfolio.buy_holding(ticker, data.get("shares"))
-    print(
-        f"Portfolio uid={portfolio_id} purchased {data.get('shares')} shares of {ticker}"
-    )
-
-
-def _sell_stock_helper(portfolio_id, data):
-    ticker = data.get("ticker")
-    portfolio = Portfolio.objects.get(uid=portfolio_id)
-    portfolio.sellHolding(ticker, -data.get("shares"))
-    print(f"Portfolio uid={portfolio_id} sold {data.get('shares')} shares of {ticker}")
 
 
 @api_view(["GET"])
@@ -203,15 +107,8 @@ def handle_holdings(request):
 
 
 @api_view(["GET"])
-def handle_holding(request, pk):
-    try:
-        holding = Holding.objects.get(uid=pk)
-        serializer = HoldingSerializer(holding, many=False)
-        print(f"Successfully fetched holding uid={pk}: {serializer.data}")
-        return Response(serializer.data)
-    except Holding.DoesNotExist:
-        print(f"Cannot fetch holding uid={pk}")
-        return
+def handle_holding(request, game_title, port_title, ticker):
+    return Response(_get_holding_helper(port_title, game_title, ticker))
 
 
 @api_view(["GET"])
@@ -224,7 +121,7 @@ def handle_transactions(request):
 
 @api_view(["GET"])
 def handle_transaction(request, pk):
-    transaction = Transaction.objects.get(uid=pk)
+    transaction = Transaction.objects.get(id=pk)
     serializer = TransactionSerializer(transaction, many=False)
     print(f"Successfully fetched transaction: {serializer.data}")
     return Response(serializer.data)
