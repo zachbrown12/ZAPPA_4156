@@ -15,7 +15,7 @@ from api.helpers import (
     _sell_stock_helper,
     _get_holding_helper,
 )
-from .utils import find_game_by_title
+from .utils import find_game_by_title, find_portfolio
 
 
 class HelperTestCase(TestCase):
@@ -110,20 +110,6 @@ class HelperTestCase(TestCase):
         with self.assertRaises(Exception):
             _delete_game_helper(title)
 
-    @mock.patch(
-        "trade_simulation.models.Game.objects.delete", return_value=Game.DoesNotExist
-    )
-    def test_delete_game_helper_does_not_exist(self, mock_delete):
-        """
-        Test that if game does not exist, we throw an exception
-        """
-        # GIVEN
-        title = "Game Title"
-        _create_game_helper(title, "test rules", 10000)
-        # WHEN / THEN
-        with self.assertRaises(Exception):
-            _delete_game_helper(title)
-
     def test_get_game_helper_success(self):
         """
         Test that we can get a game successfully
@@ -152,7 +138,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title)
+        _create_game_helper(game_title, "test rules", 10000)
         _post_portfolio_helper(portfolio_title, game_title)
 
         # WHEN
@@ -168,7 +154,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title)
+        _create_game_helper(game_title, "test rules", 10000)
 
         # WHEN / THEN
         with self.assertRaises(Exception):
@@ -192,9 +178,9 @@ class HelperTestCase(TestCase):
     @mock.patch(
         "trade_simulation.models.Portfolio.objects.all", return_value=RuntimeError
     )
-    def test_get_portfolios_error(self):
+    def test_get_portfolios_error(self, mock_portfolio):
         """
-        Test that when runtime error occurs, exception is thrown
+        Test that when runtime error occurs when getting portfolios, exception is thrown
         """
         # GIVEN
         game_title = "Test Game"
@@ -202,3 +188,143 @@ class HelperTestCase(TestCase):
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_portfolios_helper()
+
+    def test_delete_portfolio_success(self):
+        """
+        Test that we can delete an existing portfolio successfully
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        # WHEN
+        _delete_portfolio_helper(portfolio_title, game_title)
+        # THEN
+        p = find_portfolio(portfolio_title, game_title)
+        assert p is None
+
+    def test_delete_portfolio_not_exist(self):
+        """
+        Test that deleting a portfolio that does not exit throws an exception
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        with self.assertRaises(Exception):
+            _delete_portfolio_helper(portfolio_title, game_title)
+
+    @mock.patch("api.helpers._buy_stock_helper", return_value=None)
+    def test_trade_stock_helper_success_buy(self, mock_buy_stock):
+        """
+        Test that we buy a stock successfully if shares > 0
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = 3
+        # WHEN
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        # THEN
+        portfolio = find_portfolio(portfolio_title, game_title)
+        mock_buy_stock.assert_called_with(portfolio, ticker, shares)
+
+    @mock.patch("api.helpers._sell_stock_helper")
+    def test_trade_stock_helper_success_sell(self, mock_sell_stock):
+        """
+        Test that we sell a stock successfully if shares < 0
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = -3
+        # WHEN
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        # THEN
+        portfolio = find_portfolio(portfolio_title, game_title)
+        mock_sell_stock.assert_called_with(portfolio, ticker, shares)
+
+    def test_trade_stock_helper_error(self):
+        """
+        Test that we cannot buy or sell a stock if portfolio does not exist
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        with self.assertRaises(Exception):
+            _trade_stock_helper(portfolio_title, game_title, "AAPL", 3)
+
+    @mock.patch("trade_simulation.models.Portfolio.buy_holding")
+    def test_buy_stock_helper_success(self, buy_mock):
+        """
+        Test that buy stock helper works successfully
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = 3
+        portfolio = find_portfolio(portfolio_title, game_title)
+        # WHEN
+        _buy_stock_helper(portfolio, ticker, shares)
+        # THEN
+        buy_mock.assert_called_with(ticker, shares)
+
+    @mock.patch("trade_simulation.models.Portfolio.sell_holding")
+    def test_sell_stock_helper_success(self, sell_mock):
+        """
+        Test that sell stock helper works successfully
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = -3
+        portfolio = find_portfolio(portfolio_title, game_title)
+        # WHEN
+        _sell_stock_helper(portfolio, ticker, shares)
+        # THEN
+        sell_mock.assert_called_with(ticker, shares)
+
+    def test_get_holding_helper_success(self):
+        """
+        Test that we can successfully get a holding for a portfolio
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = 3
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        # WHEN
+        data = _get_holding_helper(portfolio_title, game_title, ticker)
+        # THEN
+        assert data["ticker"] == ticker
+
+    def test_get_holding_helper_error_not_exist(self):
+        """
+        Test that throws an error if portfolio does not exist
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        with self.assertRaises(Exception):
+            _get_holding_helper(portfolio_title, game_title, "AAPL")

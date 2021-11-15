@@ -130,7 +130,9 @@ def _delete_portfolio_helper(title, game_title):
     """
     portfolio = find_portfolio(title, game_title)
     if not portfolio:
-        return
+        error = f"Portfolio {title} cannot be deleted as it does not exist."
+        print(error)
+        raise Exception(error)
     try:
         portfolio.delete()
         print("Successfully deleted portfolio.")
@@ -179,6 +181,8 @@ def _trade_stock_helper(title, game_title, ticker, shares):
     Returns: N/A
     """
     portfolio = find_portfolio(title, game_title)
+    print("portfolio here")
+    print(portfolio)
     if not portfolio:
         error = f"Cannot find portfolio {title}"
         print(error)
@@ -205,7 +209,9 @@ def _sell_stock_helper(portfolio, ticker, shares):
     Helper function to sell a holding
     Returns: N/A
     """
-    portfolio.sell_holding(ticker, -shares)
+    print("sell helper")
+    print(portfolio)
+    portfolio.sell_holding(ticker, shares)
     print(f"Portfolio id={portfolio.uid} sold {shares} shares of {ticker}")
 
 
@@ -216,7 +222,9 @@ def _get_holding_helper(portfolio_title, game_title, ticker):
     """
     portfolio = find_portfolio(portfolio_title, game_title)
     if not portfolio:
-        return
+        error = f"Cannot find portfolio {portfolio_title}"
+        print(error)
+        raise Exception(error)
     holding = find_holding(portfolio_title, game_title, ticker)
     try:
         serializer = HoldingSerializer(holding, many=False)
