@@ -43,7 +43,7 @@ def getRoutes(request):
         {"POST": "/api/portfolio/trade"},
 
         {"GET": "/api/holdings"},
-        {"GET": "/api/holding/game_title/port_title/ticker"},
+        {"GET": "/api/holding/port_title/game_title/ticker"},
 
         {"GET": "/api/transactions"},
         {"GET": "/api/transaction/id"},
@@ -121,7 +121,7 @@ def handle_transactions(request):
 
 @api_view(["GET"])
 def handle_transaction(request, pk):
-    transaction = Transaction.objects.get(id=pk)
+    transaction = Transaction.objects.get(uid=pk)
     serializer = TransactionSerializer(transaction, many=False)
     print(f"Successfully fetched transaction: {serializer.data}")
     return Response(serializer.data)
