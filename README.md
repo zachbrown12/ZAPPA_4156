@@ -55,7 +55,7 @@ Each Portfolio contains Holdings of stocks in various amounts. A Portfolio has a
 Each Holding represents shares of a stock held in a portfolio. A Holding has a "ticker" and a quantity "shares".<br/><br/>
 
 <b>GET</b>   /api/holdings/ -- Returns all stock holdings in the database.<br/>
-<b>GET</b>   /api/holdings/{game_title}/{port_title}/{ticker} -- Returns the holding in the portfolio {port_title} within the game {game_title} corresponding to the ticker {ticker}.<br/>
+<b>GET</b>   /api/holdings/{port_title}/{game_title}/{ticker} -- Returns the holding in the portfolio {port_title} within the game {game_title} corresponding to the ticker {ticker}.<br/>
 
 <h4>Transactions</h4>
 Each Transaction is a record of a transaction performed by a portfolio. A Transaction has a "ticker", a "trade_type" depending on what was performed, a quantity "shares", and a "bought_price" recording the price at the time of transaction.<br/><br/>
