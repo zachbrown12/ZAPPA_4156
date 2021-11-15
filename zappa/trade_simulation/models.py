@@ -101,7 +101,6 @@ class Portfolio(models.Model):
 
     # Sell <shares> shares of stock <ticker>
     def sell_holding(self, ticker, shares):
-
         holding = Holding.objects.get(portfolio=self, ticker=ticker)
         if not holding:
             print("Holding {} is not in portfolio.".format(ticker))
