@@ -1,8 +1,4 @@
-from .serializers import (
-    GameSerializer,
-    PortfolioSerializer,
-    HoldingSerializer,
-)
+from .serializers import GameSerializer, PortfolioSerializer, HoldingSerializer
 from trade_simulation.models import Game, Portfolio, Holding
 from .utils import find_game_by_title, find_portfolio, find_holding
 
@@ -21,13 +17,17 @@ def _get_game_standings_helper():
 def _get_game_helper(game_title):
     game = find_game_by_title(game_title)
     if not game:
-        return
+        error = "Could not find game"
+        print(error)
+        raise Exception(error)
     try:
         serializer = GameSerializer(game, many=False)
         print(f"Returning game standings: {serializer.data}.")
         return serializer.data
     except RuntimeError:
-        print("Error occurs when serializing the game.")
+        error = "Error occurs when serializing the game."
+        print(error)
+        raise Exception(error)
 
 
 def _create_game_helper(title, rules, startingBalance):
@@ -45,7 +45,9 @@ def _create_game_helper(title, rules, startingBalance):
         game.save()
         print("Successfully created new game.")
     except RuntimeError:
-        print("Error occurs when creating the game.")
+        error = "Error occurs when creating the game."
+        print(error)
+        raise Exception(error)
 
 
 def _delete_game_helper(title):
@@ -56,7 +58,9 @@ def _delete_game_helper(title):
         game.delete()
         print(f"Successfully deleted game {game.title}")
     except Game.DoesNotExist:
-        print("Error occurs when deleting the game.")
+        error = "Error occurs when deleting the game."
+        print(error)
+        raise Exception(error)
 
 
 def _get_portfolios_helper():
@@ -68,7 +72,9 @@ def _get_portfolios_helper():
         print(f"Successfullly fetched all portfolios: {serializer.data}.")
         return serializer.data
     except RuntimeError:
-        print("Error occurs when fetched all portfolios.")
+        error = "Error occurs when fetched all portfolios."
+        print(error)
+        raise Exception(error)
 
 
 def _get_portfolio_helper(title, game_title):
@@ -81,7 +87,9 @@ def _get_portfolio_helper(title, game_title):
         print(f"Fetched portfolio with id={portfolio.id}: {serializer.data}")
         return serializer.data
     except RuntimeError:
-        print("Error occurs when serialize the portfolio.")
+        error = "Error occurs when serialize the portfolio."
+        print(error)
+        raise Exception(error)
 
 
 def _delete_portfolio_helper(title, game_title):
@@ -92,7 +100,9 @@ def _delete_portfolio_helper(title, game_title):
         portfolio.delete()
         print("Successfully deleted portfolio.")
     except RuntimeError:
-        print("Error occurs when serialize the portfolio.")
+        error = "Error occurs when serialize the portfolio."
+        print(error)
+        raise Exception(error)
 
 
 def _post_portfolio_helper(title, game_title):
@@ -112,15 +122,21 @@ def _post_portfolio_helper(title, game_title):
         portfolio.total_value = float(game.startingBalance)
         portfolio.title = title
         portfolio.save()
-        print(f"Successfully created new portfolio with title={title} in game {game_title}")
+        print(
+            f"Successfully created new portfolio with title={title} in game {game_title}"
+        )
     except RuntimeError:
-        print("Error occurs when creating/saving portfolio.")
+        error = "Error occurs when creating/saving portfolio."
+        print(error)
+        raise Exception(error)
 
 
 def _trade_stock_helper(title, game_title, ticker, shares):
     portfolio = find_portfolio(title, game_title)
     if not portfolio:
-        print("Cannot find portfolio")
+        error = f"Cannot find portfolio {title}"
+        print(error)
+        raise Exception(error)
     if shares > 0:
         _buy_stock_helper(portfolio, ticker, shares)
     elif shares < 0:
@@ -149,5 +165,6 @@ def _get_holding_helper(portfolio_title, game_title, ticker):
         print(f"Successfully fetched holding id={holding.id}: {serializer.data}")
         return serializer.data
     except Holding.DoesNotExist:
-        print("Error occurs when serialize the holding portfolio.")
-        return
+        error = "Error occurs when serialize the holding portfolio."
+        print(error)
+        raise Exception(error)

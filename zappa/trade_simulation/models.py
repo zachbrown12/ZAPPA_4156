@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 import uuid
 from yfinance import Ticker
 
+TRANSACTION_TYPE_BUY = "BUY"
+TRANSACTION_TYPE_SELL = "SELL"
+
 
 class Game(models.Model):
     title = models.TextField(max_length=200, unique=True)
@@ -59,8 +62,6 @@ class Portfolio(models.Model):
     def equity_value(self):
         value = 0
         holdings = Holding.objects.filter(portfolio=self)
-        if not holdings:
-            return 0
         for holding in holdings:
             value += holding.market_value()
         return value
@@ -70,11 +71,11 @@ class Portfolio(models.Model):
         self.save()
 
     # Create a transaction record
-    def add_transaction(self, ticker, shares, price, type):
+    def add_transaction(self, ticker, shares, price, transaction_type):
         transaction = Transaction.objects.create()
         transaction.portfolio = self
         transaction.ticker = ticker
-        transaction.trade_type = type
+        transaction.trade_type = transaction_type
         transaction.shares = shares
         transaction.bought_price = price
         transaction.save()
@@ -84,12 +85,14 @@ class Portfolio(models.Model):
         holding, created = Holding.objects.get_or_create(portfolio=self, ticker=ticker)
         price = holding.ask_price()
         if price is None:
-            print("Ticker {} is not currently traded.".format(ticker))
-            return
+            error = f"Ticker {ticker} is not currently traded."
+            print(error)
+            raise Exception(error)
         cost = price * float(shares)
         if float(self.cash_balance) < cost:
-            print("Not enough cash to buy ${} of {}.".format(cost, ticker))
-            return
+            error = f"Not enough cash to buy ${cost} in {shares} shares of {ticker}."
+            print(error)
+            raise Exception(error)
         holding.shares = float(0 if holding.shares is None else holding.shares) + float(
             shares
         )
@@ -98,22 +101,26 @@ class Portfolio(models.Model):
         self.cash_balance = float(self.cash_balance) - cost
         self.save()
 
-        self.add_transaction(ticker, shares, price, "Buy")
+        self.add_transaction(ticker, shares, price, TRANSACTION_TYPE_BUY)
 
     # Sell <shares> shares of stock <ticker>
     def sell_holding(self, ticker, shares):
-        holding = Holding.objects.get(portfolio=self, ticker=ticker)
-        if not holding:
-            print("Holding {} is not in portfolio.".format(ticker))
-            return
+        try:
+            holding = Holding.objects.get(portfolio=self, ticker=ticker)
+        except Holding.DoesNotExist:
+            error = f"Holding {ticker} is not in portfolio."
+            print(error)
+            raise Exception(error)
         price = holding.bid_price()
         if price is None:
-            print("Ticker {} is not currently traded.".format(ticker))
-            return
+            error = f"Ticker {ticker} is not currently traded."
+            print(error)
+            raise Exception(error)
         current_shares = float(0 if holding.shares is None else holding.shares)
         if current_shares < float(shares):
-            print("Not enough shares of {} to sell {}.".format(ticker, float(shares)))
-            return
+            error = f"Not enough shares of {ticker} to sell {shares} shares."
+            print(error)
+            raise Exception(error)
         holding.shares = current_shares - float(shares)
         if holding.shares == 0.0:
             holding.delete()
@@ -123,14 +130,14 @@ class Portfolio(models.Model):
         self.cash_balance = float(self.cash_balance) + (price * float(shares))
         self.save()
 
-        self.add_transaction(ticker, shares, price, "Sell")
+        self.add_transaction(ticker, shares, price, TRANSACTION_TYPE_SELL)
 
 
 class Holding(models.Model):
     portfolio = models.ForeignKey(
         Portfolio, null=True, blank=True, on_delete=models.CASCADE
     )
-    ticker = models.TextField(max_length=200)
+    ticker = models.TextField(max_length=4)
     shares = models.DecimalField(
         max_digits=14, decimal_places=2, default=0.00, null=True
     )
