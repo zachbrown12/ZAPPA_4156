@@ -4,6 +4,10 @@ from .utils import find_game_by_title, find_portfolio, find_holding
 
 
 def _get_game_standings_helper():
+    """
+    Helper function to fetch portfolio rankings for each game
+    Returns: Game objects with winners set
+    """
     games = Game.objects.all()
     if len(games) <= 0:
         return None
@@ -15,6 +19,10 @@ def _get_game_standings_helper():
 
 
 def _get_game_helper(game_title):
+    """
+    Helper function to find and return game
+    Returns: game with title game_title or error
+    """
     game = find_game_by_title(game_title)
     if not game:
         error = "Could not find game"
@@ -31,10 +39,15 @@ def _get_game_helper(game_title):
 
 
 def _create_game_helper(title, rules, starting_balance):
+    """
+    Helper function to create a new game
+    Returns: N/A or error
+    """
     # title is a unique field
     if Game.objects.filter(title=title).exists():
-        print("game with same name existed.")
-        return
+        error = "Game with same name already exists."
+        print(error)
+        raise Exception(error)
 
     try:
         game = Game.objects.create()
@@ -51,9 +64,15 @@ def _create_game_helper(title, rules, starting_balance):
 
 
 def _delete_game_helper(title):
+    """
+    Helper function to delete a game by title
+    Returns: N/A or error
+    """
     game = find_game_by_title(title)
     if not game:
-        return
+        error = "Error occurs when deleting the game."
+        print(error)
+        raise Exception(error)
     try:
         game.delete()
         print(f"Successfully deleted game {game.title}")
@@ -64,9 +83,14 @@ def _delete_game_helper(title):
 
 
 def _get_portfolios_helper():
+    """
+    Helper function to get all portfolios in all games
+    Returns: portfolio objects
+    """
     try:
         portfolios = Portfolio.objects.all()
         for portfolio in portfolios:
+            # Compute total value to make sure portfolio object is up to date
             portfolio.compute_total_value()
         serializer = PortfolioSerializer(portfolios, many=True)
         print(f"Successfullly fetched all portfolios: {serializer.data}.")
@@ -78,10 +102,17 @@ def _get_portfolios_helper():
 
 
 def _get_portfolio_helper(title, game_title):
+    """
+    Helper function to return specific portfolio in specific game
+    Returns: Portfolio object
+    """
     portfolio = find_portfolio(title, game_title)
     if not portfolio:
-        return
+        error = f"Could not get portfolio with title={title}"
+        print(error)
+        raise Exception(error)
     try:
+        # Compute total value to make sure portfolio object is up to date
         portfolio.compute_total_value()
         serializer = PortfolioSerializer(portfolio, many=False)
         print(f"Fetched portfolio with id={portfolio.uid}: {serializer.data}")
@@ -93,9 +124,15 @@ def _get_portfolio_helper(title, game_title):
 
 
 def _delete_portfolio_helper(title, game_title):
+    """
+    Helper function to delete specific portfolio in specific game
+    Returns: N/A or error
+    """
     portfolio = find_portfolio(title, game_title)
     if not portfolio:
-        return
+        error = f"Portfolio {title} cannot be deleted as it does not exist."
+        print(error)
+        raise Exception(error)
     try:
         portfolio.delete()
         print("Successfully deleted portfolio.")
@@ -106,14 +143,21 @@ def _delete_portfolio_helper(title, game_title):
 
 
 def _post_portfolio_helper(title, game_title):
+    """
+    Helper function to create a new portfolio
+    Returns: N/A or error
+    """
     game = find_game_by_title(game_title)
     if not game:
-        print(f"No game named {game_title}.")
-        return
+        error = f"No game named {game_title}."
+        print(error)
+        raise Exception(error)
 
     if Portfolio.objects.filter(title=title, game=game).exists():
-        print(f"Portfolio named {title} is already in game {game_title}.")
-        return
+        # We can only have one portfolio with a specific title in each game
+        error = f"Portfolio named {title} is already in game {game_title}."
+        print(error)
+        raise Exception(error)
 
     try:
         portfolio = Portfolio.objects.create()
@@ -132,7 +176,13 @@ def _post_portfolio_helper(title, game_title):
 
 
 def _trade_stock_helper(title, game_title, ticker, shares):
+    """
+    Helper function to buy or sell a stock
+    Returns: N/A
+    """
     portfolio = find_portfolio(title, game_title)
+    print("portfolio here")
+    print(portfolio)
     if not portfolio:
         error = f"Cannot find portfolio {title}"
         print(error)
@@ -145,20 +195,36 @@ def _trade_stock_helper(title, game_title, ticker, shares):
 
 # TODO:combining sellholding and buyholding
 def _buy_stock_helper(portfolio, ticker, shares):
+    """
+    Helper function to buy a holding
+    Returns: N/A
+    """
     portfolio.buy_holding(ticker, shares)
     print(f"Portfolio id={portfolio.uid} purchased {shares} shares of {ticker}")
 
 
 # TODO:combining sellholding and buyholding
 def _sell_stock_helper(portfolio, ticker, shares):
-    portfolio.sell_holding(ticker, -shares)
+    """
+    Helper function to sell a holding
+    Returns: N/A
+    """
+    print("sell helper")
+    print(portfolio)
+    portfolio.sell_holding(ticker, shares)
     print(f"Portfolio id={portfolio.uid} sold {shares} shares of {ticker}")
 
 
 def _get_holding_helper(portfolio_title, game_title, ticker):
+    """
+    Helper function to fetch a particular holding in a portfolio
+    Returns: Holding data or error
+    """
     portfolio = find_portfolio(portfolio_title, game_title)
     if not portfolio:
-        return
+        error = f"Cannot find portfolio {portfolio_title}"
+        print(error)
+        raise Exception(error)
     holding = find_holding(portfolio_title, game_title, ticker)
     try:
         serializer = HoldingSerializer(holding, many=False)

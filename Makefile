@@ -1,11 +1,15 @@
 .PHONY : test trade flake8 html_coverage
 # Run all tests
 test:
-	make trade
+	make trade api
 
 # Run trade_simulation tests only
 trade:
 	python3.8 zappa/manage.py test trade_simulation.tests
+
+# Run api tests only
+api:
+	python3.8 zappa/manage.py test api.tests
 
 # Run flake8 and generate output to bugs.txt
 flake8:
