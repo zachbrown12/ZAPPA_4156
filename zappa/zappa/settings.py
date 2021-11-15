@@ -77,7 +77,14 @@ WSGI_APPLICATION = "zappa.wsgi.application"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    # "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "trade_simulation",
+        "USER": "zappa",
+        "PASSWORD": "incaroads",
+        "HOST": "database-1.c8j9g5p5qd7q.us-east-2.rds.amazonaws.com",
+        "PORT": 5432}
 }
 
 
