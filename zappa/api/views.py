@@ -1,24 +1,18 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import (
-    HoldingSerializer,
-    TransactionSerializer,
-)
+from .serializers import HoldingSerializer, TransactionSerializer
 from trade_simulation.models import Game, Portfolio, Holding, Transaction
 from .helpers import (
     _get_game_standings_helper,
-
     _get_game_helper,
     _create_game_helper,
     _delete_game_helper,
-
     _get_portfolios_helper,
     _get_portfolio_helper,
     _post_portfolio_helper,
     _delete_portfolio_helper,
-
     _trade_stock_helper,
-    _get_holding_helper
+    _get_holding_helper,
 )
 
 GET_METHOD = "GET"
@@ -34,17 +28,13 @@ def getRoutes(request):
         {"GET": "/api/game/game_title"},
         {"POST": "/api/game/game_title"},
         {"DELETE": "/api/game/game_title"},
-
         {"GET": "/api/portfolios"},
         {"GET": "/api/portfolio/game_title/port_title"},
         {"POST": "/api/portfolio/game_title/port_title"},
         {"DELETE": "/api/portfolio/game_title/port_title"},
-
         {"POST": "/api/portfolio/trade"},
-
         {"GET": "/api/holdings"},
         {"GET": "/api/holding/port_title/game_title/ticker"},
-
         {"GET": "/api/transactions"},
         {"GET": "/api/transaction/uid"},
     ]
@@ -60,31 +50,56 @@ def handle_games(request):
 @api_view(["GET", "POST", "DELETE"])
 def handle_game(request, game_title):
     if request.method == GET_METHOD:
-        return Response(_get_game_helper(game_title))
+        try:
+            data = _get_game_helper(game_title)
+            return Response(data)
+        except Exception as e:
+            return Response(status=500, data=e)
     elif request.method == POST_METHOD:
         rules = request.data.get("rules")
-        startingBalance = request.data.get("startingBalance", None)
-        _create_game_helper(game_title, rules, startingBalance)
+        starting_balance = request.data.get("starting_balance")
+        try:
+            _create_game_helper(game_title, rules, starting_balance)
+        except Exception as e:
+            return Response(status=500, data=e)
         return Response()
     elif request.method == DELETE_METHOD:
-        return Response(_delete_game_helper(game_title))
+        try:
+            data = _delete_game_helper(game_title)
+            return Response(data)
+        except Exception as e:
+            return Response(status=500, data=e)
 
 
 @api_view(["GET"])
 def handle_portfolios(request):
-    return Response(_get_portfolios_helper())
+    try:
+        data = _get_portfolios_helper()
+        return Response(data)
+    except Exception as e:
+        return Response(status=500, data=e)
 
 
 @api_view(["GET", "POST", "DELETE"])
 def handle_portfolio(request, game_title, port_title):
     if request.method == GET_METHOD:
-        return Response(_get_portfolio_helper(port_title, game_title))
+        try:
+            data = _get_portfolio_helper(port_title, game_title)
+            return Response(data)
+        except Exception as e:
+            return Response(status=500, data=e)
     elif request.method == POST_METHOD:
-        _post_portfolio_helper(port_title, game_title)
-        return Response()
+        try:
+            _post_portfolio_helper(port_title, game_title)
+            return Response()
+        except Exception as e:
+            return Response(status=500, data=e)
     elif request.method == DELETE_METHOD:
-        _delete_portfolio_helper(port_title, game_title)
-        return Response()
+        try:
+            _delete_portfolio_helper(port_title, game_title)
+            return Response()
+        except Exception as e:
+            return Response(status=500, data=e)
 
 
 @api_view(["POST"])
@@ -95,7 +110,10 @@ def trade(request):
         game_title = request.data.get("gameTitle")
         ticker = request.data.get("ticker")
         shares = request.data.get("shares")
-        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        try:
+            _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        except Exception as e:
+            return Response(status=500, data=e)
     return Response()
 
 

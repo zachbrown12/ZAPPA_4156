@@ -10,58 +10,150 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
-            name='Game',
+            name="Game",
             fields=[
-                ('title', models.TextField(max_length=200, unique=True)),
-                ('starting_balance', models.DecimalField(decimal_places=2, default=10000.0, max_digits=14)),
-                ('rules', models.TextField(max_length=200)),
-                ('winner', models.CharField(blank=True, max_length=200, null=True)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
+                ("title", models.TextField(max_length=200, unique=True)),
+                (
+                    "starting_balance",
+                    models.DecimalField(
+                        decimal_places=2, default=10000.0, max_digits=14
+                    ),
+                ),
+                ("rules", models.TextField(max_length=200)),
+                ("winner", models.CharField(blank=True, max_length=200, null=True)),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Portfolio',
+            name="Portfolio",
             fields=[
-                ('game_rank', models.IntegerField(blank=True, null=True)),
-                ('title', models.TextField(max_length=200)),
-                ('cash_balance', models.DecimalField(decimal_places=2, default=10000.0, max_digits=14)),
-                ('total_value', models.DecimalField(decimal_places=2, default=10000.0, max_digits=14)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('game', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='trade_simulation.game')),
-                ('owner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("game_rank", models.IntegerField(blank=True, null=True)),
+                ("title", models.TextField(max_length=200)),
+                (
+                    "cash_balance",
+                    models.DecimalField(
+                        decimal_places=2, default=10000.0, max_digits=14
+                    ),
+                ),
+                (
+                    "total_value",
+                    models.DecimalField(
+                        decimal_places=2, default=10000.0, max_digits=14
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                (
+                    "game",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="trade_simulation.game",
+                    ),
+                ),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
-            options={
-                'unique_together': {('title', 'game')},
-            },
+            options={"unique_together": {("title", "game")}},
         ),
         migrations.CreateModel(
-            name='Transaction',
+            name="Transaction",
             fields=[
-                ('ticker', models.TextField(max_length=200)),
-                ('trade_type', models.TextField(max_length=200)),
-                ('shares', models.DecimalField(decimal_places=2, default=0.0, max_digits=14, null=True)),
-                ('bought_price', models.DecimalField(decimal_places=2, default=0.0, max_digits=14)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('portfolio', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='trade_simulation.portfolio')),
+                ("ticker", models.TextField(max_length=200)),
+                ("trade_type", models.TextField(max_length=200)),
+                (
+                    "shares",
+                    models.DecimalField(
+                        decimal_places=2, default=0.0, max_digits=14, null=True
+                    ),
+                ),
+                (
+                    "bought_price",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=14),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                (
+                    "portfolio",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="trade_simulation.portfolio",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Holding',
+            name="Holding",
             fields=[
-                ('ticker', models.TextField(max_length=200)),
-                ('shares', models.DecimalField(decimal_places=2, default=0.0, max_digits=14, null=True)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('portfolio', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='trade_simulation.portfolio')),
+                ("ticker", models.TextField(max_length=200)),
+                (
+                    "shares",
+                    models.DecimalField(
+                        decimal_places=2, default=0.0, max_digits=14, null=True
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                (
+                    "portfolio",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="trade_simulation.portfolio",
+                    ),
+                ),
             ],
         ),
     ]
