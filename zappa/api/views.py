@@ -31,11 +31,11 @@ def getRoutes(request):
 
     routes = [
         {"GET": "/api/games"},
+        {"GET": "/api/game/game_title"},
         {"POST": "/api/game/game_title"},
         {"DELETE": "/api/game/game_title"},
 
         {"GET": "/api/portfolios"},
-
         {"GET": "/api/portfolio/game_title/port_title"},
         {"POST": "/api/portfolio/game_title/port_title"},
         {"DELETE": "/api/portfolio/game_title/port_title"},
@@ -46,7 +46,7 @@ def getRoutes(request):
         {"GET": "/api/holding/port_title/game_title/ticker"},
 
         {"GET": "/api/transactions"},
-        {"GET": "/api/transaction/id"},
+        {"GET": "/api/transaction/uid"},
     ]
 
     return Response(routes)
