@@ -2,6 +2,9 @@ from trade_simulation.models import Game, Portfolio, Holding
 
 
 def find_game_by_title(title):
+    """
+    Function that runs a query on the database to find one game.
+    """
     try:
         game = Game.objects.get(title=title)
         return game
@@ -11,6 +14,9 @@ def find_game_by_title(title):
 
 
 def find_portfolio(title, game_title):
+    """
+    Function that runs a query on the database to find one portfolio
+    """
     game = find_game_by_title(game_title)
     if not game:
         return
@@ -23,6 +29,9 @@ def find_portfolio(title, game_title):
 
 
 def find_holding(title, game_title, ticker):
+    """
+    Function that runs a query on the database to find one holding.
+    """
     portfolio = find_portfolio(title, game_title)
     if not portfolio:
         return
