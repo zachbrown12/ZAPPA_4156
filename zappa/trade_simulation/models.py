@@ -8,11 +8,18 @@ TRANSACTION_TYPE_SELL = "SELL"
 
 
 class Game(models.Model):
+    """
+    Game represents environment where users can create their portfolios
+    and compete for the highest valued portfolio
+    """
+
+    # Title is a unique identifier for the game
     title = models.TextField(max_length=200, unique=True)
     starting_balance = models.DecimalField(
         max_digits=14, decimal_places=2, default=10000.00
     )
     rules = models.TextField(max_length=200)
+    # Winner is set once a user has won the game at the conclusion of the game
     winner = models.CharField(max_length=200, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     uid = models.UUIDField(
@@ -20,9 +27,17 @@ class Game(models.Model):
     )
 
     def __str__(self):
+        """
+        Return string representation of game
+        """
         return self.title
 
     def rank_portfolios(self):
+        """
+        rank_portfolios iterates through all portfolios in the game to
+        compute their total value and ranks the portfolios based on this value
+        Returns: list of portfolios ordered by ranking
+        """
         portfolios = Portfolio.objects.filter(game=self)
         for portfolio in portfolios:
             portfolio.compute_total_value()
@@ -40,8 +55,14 @@ class Game(models.Model):
 
 
 class Portfolio(models.Model):
+    """
+    Portfolio is the representation of a user's stock portfolio
+    """
+
     owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    # Each portfolio is associated with a game in progress
     game = models.ForeignKey(Game, null=True, blank=True, on_delete=models.CASCADE)
+    # All portfolios are tied for first place to begin
     game_rank = models.IntegerField(default=1)
     title = models.TextField(max_length=200)
     cash_balance = models.DecimalField(
@@ -57,21 +78,35 @@ class Portfolio(models.Model):
         unique_together = ("title", "game")
 
     def __str__(self):
+        """
+        String representation of a portfolio
+        """
         return self.title
 
     def equity_value(self):
-        value = 0
+        """
+        equity_value computes the combined value of all holdings owned by the portfolio
+        Returns: double value
+        """
+        value = 0.0
         holdings = Holding.objects.filter(portfolio=self)
         for holding in holdings:
             value += holding.market_value()
         return value
 
     def compute_total_value(self):
+        """
+        compute_total_value computes the total value of the portfolio (cash + equities)
+        Returns: N/A
+        """
         self.total_value = self.equity_value() + float(self.cash_balance)
         self.save()
 
-    # Create a transaction record
     def add_transaction(self, ticker, shares, price, transaction_type):
+        """
+        add_transaction creates a transaction record for a transaction that has occurred
+        Returns: N/A
+        """
         transaction = Transaction.objects.create()
         transaction.portfolio = self
         transaction.ticker = ticker
@@ -80,8 +115,11 @@ class Portfolio(models.Model):
         transaction.bought_price = price
         transaction.save()
 
-    # Buy <shares> shares of stock <ticker>
     def buy_holding(self, ticker, shares):
+        """
+        buy_holding allows a user to purchase s shares of ticker t to add to the portfolio
+        Returns: N/A or Exception if user cannot purchase s shares of ticker t
+        """
         holding, created = Holding.objects.get_or_create(portfolio=self, ticker=ticker)
         price = holding.ask_price()
         if price is None:
@@ -103,8 +141,11 @@ class Portfolio(models.Model):
 
         self.add_transaction(ticker, shares, price, TRANSACTION_TYPE_BUY)
 
-    # Sell <shares> shares of stock <ticker>
     def sell_holding(self, ticker, shares):
+        """
+        sell_holding allows a user to sell s shares of ticker t currently in their portfolio
+        Returns: N/A or Exception if user cannot sell s shares of ticker t
+        """
         try:
             holding = Holding.objects.get(portfolio=self, ticker=ticker)
         except Holding.DoesNotExist:
@@ -134,10 +175,15 @@ class Portfolio(models.Model):
 
 
 class Holding(models.Model):
+    """
+    Holding represents a particular entity included in a portfolio
+    """
+
+    # Each holding associated with a portfolio
     portfolio = models.ForeignKey(
         Portfolio, null=True, blank=True, on_delete=models.CASCADE
     )
-    ticker = models.TextField(max_length=4)
+    ticker = models.TextField(max_length=5)
     shares = models.DecimalField(
         max_digits=14, decimal_places=2, default=0.00, null=True
     )
@@ -147,32 +193,52 @@ class Holding(models.Model):
     )
 
     def __str__(self):
+        """
+        String representation of holding
+        """
         return self.ticker
 
-    # Get the ask price (what you can buy immediately for)
     def ask_price(self):
+        """
+        ask_price calls the yfinance API to compute the immediate price of the equity
+        Returns: price of stock
+        """
         tick = Ticker(str(self.ticker))
         stock_info = tick.info
         if stock_info.get("ask") is None:
             return None
+        # Based on yfinance API restrictions to market hours, we return regularMarketPrice if after market hours
         if stock_info.get("ask") == 0:
             return stock_info.get("regularMarketPrice")
         return stock_info.get("ask")
 
-    # Get the bid price (what you can sell immediately for)
     def bid_price(self):
+        """
+        bid_price calls the yfinance API to compute the immediate price of the equity
+        Returns: price of stock
+        """
         stock_info = Ticker(str(self.ticker)).info
         if stock_info.get("bid") is None:
             return None
+        # Based on yfinance API restrictions to market hours, we return regularMarketPrice if after market hours
         if stock_info.get("bid") == 0:
             return stock_info.get("regularMarketPrice")
         return stock_info.get("bid")
 
     def market_value(self):
+        """
+        market_value computes market value of a holding
+        Returns: double value
+        """
         return self.bid_price() * float(self.shares)
 
 
 class Transaction(models.Model):
+    """
+    Transactions are created every time a holding is purchased or sold
+    """
+
+    # Transactions are associated with certain portfolios
     portfolio = models.ForeignKey(
         Portfolio, null=True, blank=True, on_delete=models.CASCADE
     )
@@ -181,6 +247,7 @@ class Transaction(models.Model):
     shares = models.DecimalField(
         max_digits=14, decimal_places=2, default=0.00, null=True
     )
+    # Price that a holding was purchased/sold for
     bought_price = models.DecimalField(max_digits=14, decimal_places=2, default=0.00)
     created_on = models.DateTimeField(auto_now_add=True)
     uid = models.UUIDField(
@@ -188,4 +255,7 @@ class Transaction(models.Model):
     )
 
     def __str__(self):
+        """
+        String representation of transaction
+        """
         return self.ticker
