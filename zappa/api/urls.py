@@ -2,16 +2,14 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.getRoutes),
-    path('games/', views.getGames),
-    path('games/<str:pk>', views.getGame),
-    path('portfolios/', views.getPortfolios),
-    path('portfolios/<str:pk>', views.getPortfolio),
-    path('newportfolio/', views.makePortfolio),
-    path('buystock/<str:pk>', views.buyStock),
-    path('sellstock/<str:pk>', views.sellStock),
-    path('holdings/', views.getHoldings),
-    path('holding/<str:pk>', views.getHolding),
-    path('transactions/', views.getTransactions),
-    path('transactions/<str:pk>', views.getTransaction),
+    path("", views.getRoutes),
+    path("games/", views.handle_games),
+    path("game/<str:game_title>", views.handle_game),
+    path("portfolios", views.handle_portfolios),
+    path("portfolio/<str:game_title>/<str:port_title>/", views.handle_portfolio),
+    path("portfolio/trade", views.trade),
+    path("holdings/", views.handle_holdings),
+    path("holding/<str:port_title>/<str:game_title>/<str:ticker>", views.handle_holding),
+    path("transactions/", views.handle_transactions),
+    path("transaction/<str:pk>", views.handle_transaction)
 ]
