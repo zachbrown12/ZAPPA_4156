@@ -4,17 +4,18 @@ from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-# Create your views here.
 
-
+# render a page to login the account
 def login_user(request):
     if request.user.is_authenticated:
         return redirect("profiles")
 
+    # post the login request and redirect
     if request.method == "POST":
         username = request.POST["username"]
         password = request.POST["password"]
 
+        # get the authorization
         try:
             user = User.objects.get(username=username)
         except Exception as e:
@@ -31,10 +32,12 @@ def login_user(request):
     return render(request, "users/login_register.html")
 
 
+# render a page to register a new user
 def register_user(request):
     page = "register"
     form = UserCreationForm()
 
+    # post the register request and redirect to the account page
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -54,10 +57,12 @@ def register_user(request):
     return render(request, "users/login_register.html", context)
 
 
+# log out the user page
 def logout_user(request):
     logout(request)
     return redirect("login")
 
 
+# render profile page
 def profiles(request):
     return render(request, "users/profiles.html")
