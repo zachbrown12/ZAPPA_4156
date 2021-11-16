@@ -67,7 +67,7 @@ def handle_game(request, game_title):
     # On a POST request create the game or throw an error
     elif request.method == POST_METHOD:
         rules = request.data.get("rules")
-        starting_balance = request.data.get("starting_balance")
+        starting_balance = request.data.get("startingBalance")
         try:
             _create_game_helper(game_title, rules, starting_balance)
         except Exception as e:
