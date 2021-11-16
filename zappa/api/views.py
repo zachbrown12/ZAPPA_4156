@@ -63,7 +63,7 @@ def handle_game(request, game_title):
             data = _get_game_helper(game_title)
             return Response(data)
         except Exception as e:
-            return Response(status=500, data=e)
+            return Response(status=500, data=str(e))
     # On a POST request create the game or throw an error
     elif request.method == POST_METHOD:
         rules = request.data.get("rules")
@@ -71,7 +71,7 @@ def handle_game(request, game_title):
         try:
             _create_game_helper(game_title, rules, starting_balance)
         except Exception as e:
-            return Response(status=500, data=e)
+            return Response(status=500, data=str(e))
         return Response()
     # On a DELETE request delete the game or throw an error
     elif request.method == DELETE_METHOD:
@@ -79,7 +79,7 @@ def handle_game(request, game_title):
             data = _delete_game_helper(game_title)
             return Response(data)
         except Exception as e:
-            return Response(status=500, data=e)
+            return Response(status=500, data=str(e))
 
 
 @api_view(["GET"])
@@ -91,7 +91,7 @@ def handle_portfolios(request):
         data = _get_portfolios_helper()
         return Response(data)
     except Exception as e:
-        return Response(status=500, data=e)
+        return Response(status=500, data=str(e))
 
 
 @api_view(["GET", "POST", "DELETE"])
@@ -105,21 +105,21 @@ def handle_portfolio(request, game_title, port_title):
             data = _get_portfolio_helper(port_title, game_title)
             return Response(data)
         except Exception as e:
-            return Response(status=500, data=e)
+            return Response(status=500, data=str(e))
     # On a POST request create the portfolio or throw an error
     elif request.method == POST_METHOD:
         try:
             _post_portfolio_helper(port_title, game_title)
             return Response()
         except Exception as e:
-            return Response(status=500, data=e)
+            return Response(status=500, data=str(e))
     # On a DELETE request delete the portfolio or throw an error
     elif request.method == DELETE_METHOD:
         try:
             _delete_portfolio_helper(port_title, game_title)
             return Response()
         except Exception as e:
-            return Response(status=500, data=e)
+            return Response(status=500, data=str(e))
 
 
 @api_view(["POST"])
@@ -137,7 +137,7 @@ def trade(request):
         try:
             _trade_stock_helper(portfolio_title, game_title, ticker, shares)
         except Exception as e:
-            return Response(status=500, data=e)
+            return Response(status=500, data=str(e))
     return Response()
 
 
@@ -156,7 +156,10 @@ def handle_holding(request, game_title, port_title, ticker):
     """
     Function that handles getting one holding within a portfolio
     """
-    return Response(_get_holding_helper(port_title, game_title, ticker))
+    try:
+        return Response(_get_holding_helper(port_title, game_title, ticker))
+    except Exception as e:
+        return Response(status=500, data=str(e))
 
 
 @api_view(["GET"])
@@ -175,7 +178,10 @@ def handle_transaction(request, pk):
     """
     Function that handles getting one particular transaction.
     """
-    transaction = Transaction.objects.get(uid=pk)
+    try:
+        transaction = Transaction.objects.get(uid=pk)
+    except Exception:
+        return Response(status=500, data=f"Transaction with uid {pk} not found.")
     serializer = TransactionSerializer(transaction, many=False)
     print(f"Successfully fetched transaction: {serializer.data}")
     return Response(serializer.data)
