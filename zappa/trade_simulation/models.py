@@ -123,6 +123,7 @@ class Portfolio(models.Model):
         holding, created = Holding.objects.get_or_create(portfolio=self, ticker=ticker)
         price = holding.ask_price()
         if price is None:
+            holding.delete()
             error = f"Ticker {ticker} is not currently traded."
             print(error)
             raise Exception(error)
@@ -230,7 +231,8 @@ class Holding(models.Model):
         market_value computes market value of a holding
         Returns: double value
         """
-        return self.bid_price() * float(self.shares)
+        price = self.bid_price() or 0.0
+        return price * float(self.shares)
 
 
 class Transaction(models.Model):

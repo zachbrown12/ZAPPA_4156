@@ -39,5 +39,5 @@ def find_holding(title, game_title, ticker):
         holding = Holding.objects.get(portfolio=portfolio, ticker=ticker)
         return holding
     except Holding.DoesNotExist:
-        print(f"No holding of ticker {ticker} in portfolio {portfolio.id}")
+        print(f"No holding of ticker {ticker} in portfolio {title}.")
         return None
