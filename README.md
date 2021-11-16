@@ -3,17 +3,28 @@
 <h3>Overview</h3>
 
 <p>This project is an API for creating competitive stock-trading games, in which the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
-  
-<h3> System Tests </h3>
+ 
+<h3> Source code </h3>
+
+Our main application logic is contained within:
+<ul>
+  <li>zappa/api/helpers.py</li> 
+  <li>zappa/api/serializers.py</li>
+  <li>zappa/api/utils.py</li>
+  <li>zappa/api/views.py</li>
+  <li>zappa/trade_simulation/models.py</li>
+</ul>
+
+<h3> System tests </h3>
 
 We have a suite of system tests using Postman, under the <a href="https://columbia-university-student-plan-team-187884.postman.co/workspace/ZAPPA~414bd806-3ab6-4b69-8800-28b2145f10ca/collection/14941238-038eb57b-2eae-4982-9dc1-a5c505356fce">ZAPPA workspace</a>.<br/>
 
-<h3> Unit Tests </h3>
+<h3> Unit tests </h3>
 
 To run our unit tests check our htmlcov file or, run coverage run --source='.' zappa/manage.py test zappa.<br/>
 Currently our coverage is at 89% which we hope to increase with each iteration.<br/>
 
-<h3>Style Compliance</h3>
+<h3>Style compliance</h3>
 
 We are using black and flake8 for Python style checking; the output file for this is in bugs.txt which is empty.<br/>
 To run the tests for flake8 you may run python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv > bugs.txt  <br/>
@@ -43,17 +54,6 @@ python .\zappa\manage.py migrate <br/>
 
 2. run server <br/>
 python .\zappa\manage.py runserver<br/>
-
-<h3> Documentation </h3>
-
-Most of our main application logic is contained within:
-<ul>
-  <li>zappa/api/helpers.py</li> 
-  <li>zappa/api/serializers.py</li>
-  <li>zappa/api/utils.py</li>
-  <li>zappa/api/views.py</li>
-  <li>zappa/trade_simulation/models.py</li>
-</ul>
   
 <h3>Available endpoints for the service</h3>
   
