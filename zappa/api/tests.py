@@ -1,5 +1,8 @@
 from django.test import TestCase
 import mock
+import requests
+from django.http import HttpRequest
+import json
 from trade_simulation.models import Game, Portfolio, Holding, Transaction
 from api.helpers import (
     _get_game_standings_helper,
@@ -14,6 +17,17 @@ from api.helpers import (
     _buy_stock_helper,
     _sell_stock_helper,
     _get_holding_helper,
+)
+from api.views import (
+    handle_games,
+    handle_game,
+    handle_portfolios,
+    handle_portfolio,
+    trade,
+    handle_holdings,
+    handle_holding,
+    handle_transactions,
+    handle_transaction,
 )
 from .utils import find_game_by_title, find_portfolio
 
@@ -328,3 +342,214 @@ class HelperTestCase(TestCase):
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_holding_helper(portfolio_title, game_title, "AAPL")
+
+    def test_handle_games_success(self):
+        """
+        Test that we can get a game successfully
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/games/'
+        game_title = "Game Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_games(request).status_code, 200)
+
+    def test_handle_game_get(self):
+        """
+        Test that we can get a game successfully
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/game/'
+        game_title = "Game Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_game(request, "Game Title").status_code, 200)
+
+    def test_handle_game_get_fail(self):
+        """
+        Tests failure on getting a game when it does not exist.
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/game/'
+        game_title = "Game Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
+
+    def test_handle_game_post_fail(self):
+        """
+        Tests failure on creating games
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'POST'
+        request.path = '/api/game/'
+        game_title = "Game Title"
+        request.POST = {'rules': ['kill or be killed'], 'startingBalance': ['15000']}
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
+
+    def test_handle_game_delete_fail(self):
+        """
+        Tests failure on deleteing games
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'DELETE'
+        request.path = '/api/game/'
+        game_title = "Game Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
+
+    def test_handle_portfolios_success(self):
+        """
+        Test that we can get all portfolios successfully
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/portfolios/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolios(request).status_code, 200)
+
+    def test_handle_portfolio_get(self):
+        """
+        Test that we can get a portfolio successfully
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/portfolio/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, "Game Title", "Portfolio Title").status_code, 200)
+
+    def test_handle_portfolio_get_fail(self):
+        """
+        Tests failure on getting a portfolio when it does not exist.
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/portfolio/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
+
+    def test_handle_portfolio_post_fail(self):
+        """
+        Tests failure on creating portfolios
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'POST'
+        request.path = '/api/portfolio/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
+
+    def test_handle_portfolio_delete_fail(self):
+        """
+        Tests failure on deleteing portfolios
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'DELETE'
+        request.path = '/api/portfolio/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
+
+    def test_handle_trade_post_fail(self):
+        """
+        Tests failure on creating trades
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'POST'
+        request.path = '/api/portfolio/trade'
+        request.POST = {'securityType': ['Blah']}
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
+
+    def test_handle_holdings_success(self):
+        """
+        Test that we can get all holdings successfully
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/holdings/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = 3
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        # WHEN / THEN
+        self.assertEqual(handle_holdings(request).status_code, 200)
+
+    def test_handle_holding_success(self):
+        """
+        Test that we can get a holding successfully successfully
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/holdings/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = 3
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        # WHEN / THEN
+        self.assertEqual(handle_holding(request, game_title, portfolio_title, ticker).status_code, 200)
+
+    def test_handle_transactions_success(self):
+        """
+        Test that we can get all transactions successfully
+        """
+        # GIVEN
+        request = HttpRequest()
+        request.method = 'GET'
+        request.path = '/api/holdings/'
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title)
+        ticker = "AAPL"
+        shares = 3
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        # WHEN / THEN
+        self.assertEqual(handle_transactions(request).status_code, 200)
