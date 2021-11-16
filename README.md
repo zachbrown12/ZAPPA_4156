@@ -35,7 +35,7 @@ python .\zappa\manage.py runserver<br/>
 Using the resource path http://127.0.0.1:8000/, the following methods are available:<br/>
 
 <h4>Games</h4>
-Each Game contains Portfolios that compete against each other to attain the highest value. A Game has a "title", "rules", a "starting balance" that all portfolios within the game are initialized with, and a "winner" to be determined.<br/><br/>
+Each Game contains Portfolios that compete against each other to attain the highest value. A Game has a "title", "rules", a "starting_balance" that all portfolios within the game are initialized with, and a "winner" to be determined.<br/><br/>
 
 <b>GET</b>   /api/games/ -- Returns the current status of all games and the portfolios within, including the values and rankings of portfolios within each game, using stock bid prices at the time called.<br/>
 <b>GET</b>   /api/game/{game_title} -- Returns the current status of the game with title {game_title} and the portfolios within, including the values and rankings of its portfolios, using stock bid prices at the time called.<br/>
@@ -55,7 +55,7 @@ Each Portfolio contains Holdings of stocks in various amounts. A Portfolio has a
 Each Holding represents shares of a stock held in a portfolio. A Holding has a "ticker" and a quantity "shares".<br/><br/>
 
 <b>GET</b>   /api/holdings/ -- Returns all stock holdings in the database.<br/>
-<b>GET</b>   /api/holdings/{port_title}/{game_title}/{ticker} -- Returns the holding in the portfolio {port_title} within the game {game_title} corresponding to the ticker {ticker}.<br/>
+<b>GET</b>   /api/holding/{port_title}/{game_title}/{ticker} -- Returns the holding in the portfolio {port_title} within the game {game_title} corresponding to the ticker {ticker}.<br/>
 
 <h4>Transactions</h4>
 Each Transaction is a record of a transaction performed by a portfolio. A Transaction has a "ticker", a "trade_type" depending on what was performed, a quantity "shares", and a "bought_price" recording the price at the time of transaction.<br/><br/>
