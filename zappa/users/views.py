@@ -5,8 +5,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 
-# render a page to login the account
 def login_user(request):
+    """
+    Render a page to login the account
+    """
+
     if request.user.is_authenticated:
         return redirect("profiles")
 
@@ -32,8 +35,10 @@ def login_user(request):
     return render(request, "users/login_register.html")
 
 
-# render a page to register a new user
 def register_user(request):
+    """
+    Render a page to register a new user
+    """
     page = "register"
     form = UserCreationForm()
 
@@ -57,12 +62,16 @@ def register_user(request):
     return render(request, "users/login_register.html", context)
 
 
-# log out the user page
 def logout_user(request):
+    """
+    Render a page to log out
+    """
     logout(request)
     return redirect("login")
 
 
-# render profile page
 def profiles(request):
+    """
+    Render profile page
+    """
     return render(request, "users/profiles.html")
