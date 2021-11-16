@@ -190,7 +190,7 @@ def _trade_stock_helper(title, game_title, ticker, shares):
     if shares > 0:
         _buy_stock_helper(portfolio, ticker, shares)
     elif shares < 0:
-        _sell_stock_helper(portfolio, ticker, shares)
+        _sell_stock_helper(portfolio, ticker, -shares)
 
 
 # TODO:combining sellholding and buyholding
