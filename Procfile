@@ -1,1 +1,1 @@
-web: gunicorn zappa.zappa.wsgi --log-file -
+web: gunicorn zappa.wsgi --log-file -
