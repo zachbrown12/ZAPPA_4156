@@ -30,6 +30,9 @@ python -m pip install psycopg2<br/>
 
 To install gunicorn:<br/>
 python -m pip install gunicorn<br/>
+
+To install whitenoise:<br/>
+python -m pip install whitenoise<br/>
   
 To install Django:<br/>
 python -m pip install Django<br/>
