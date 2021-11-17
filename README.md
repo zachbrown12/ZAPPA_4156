@@ -27,6 +27,9 @@ python -m pip install yfinance --upgrade --no-cache-dir<br/>
 
 To install psycopg2:<br/>
 python -m pip install psycopg2<br/>
+
+To install gunicorn:<br/>
+python -m pip install gunicorn<br/>
   
 To install Django:<br/>
 python -m pip install Django<br/>

@@ -1,0 +1,1 @@
+web: gunicorn zappa/zappa.wsgi --log-file-
