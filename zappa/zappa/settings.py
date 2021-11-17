@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-)g6+#)_2lg8kl^1%j)z(v0*($u!7*3e^g$+xn-quc7(84-7nl8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'zappa-api.herokuapp.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
