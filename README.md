@@ -6,12 +6,12 @@
 
 <h3>Architecture</h3>
 
-![Alt text](images/architecture.png?raw=true "Zappa Architecture V1.0")
+<img src="images/architecture.png" width="500" />
  
  
 <h3>Database</h3>
 
-![Alt text](images/db.png?raw=true "Zappa Database V1.0")
+<img src="images/db.png" width="500" />
 
 <h3> Source code </h3>
 
