@@ -9,6 +9,9 @@
 <img src="images/architecture.png" width="600" />
  
  
+ <h3>URL</h3>
+ https://zappa-api.herokuapp.com/api
+ 
 <h3>Database v1.0</h3>
 
 <img src="images/db.png" width="1000" />
@@ -47,6 +50,12 @@ python -m pip install yfinance --upgrade --no-cache-dir<br/>
 
 To install psycopg2:<br/>
 python -m pip install psycopg2<br/>
+
+To install gunicorn:<br/>
+python -m pip install gunicorn<br/>
+
+To install whitenoise:<br/>
+python -m pip install whitenoise<br/>
   
 To install Django:<br/>
 python -m pip install Django<br/>
