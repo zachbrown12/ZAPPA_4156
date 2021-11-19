@@ -4,12 +4,12 @@
 
 <p>This project is an API for creating competitive stock-trading games, in which the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
 
-<h3>Architecture</h3>
+<h3>Architecture v1.0</h3>
 
 <img src="images/architecture.png" width="600" />
  
  
-<h3>Database</h3>
+<h3>Database v1.0</h3>
 
 <img src="images/db.png" width="1000" />
 
