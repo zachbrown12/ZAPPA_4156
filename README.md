@@ -6,12 +6,12 @@
 
 <h3>Architecture</h3>
 
-<img src="images/architecture.png" width="500" />
+<img src="images/architecture.png" width="600" />
  
  
 <h3>Database</h3>
 
-<img src="images/db.png" width="500" />
+<img src="images/db.png" width="1000" />
 
 <h3> Source code </h3>
 
