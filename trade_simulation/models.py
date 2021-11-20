@@ -26,6 +26,9 @@ class Game(models.Model):
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 
+    class Meta:
+        ordering = ['-created_on']
+
     def __str__(self):
         """
         Return string representation of game
@@ -76,6 +79,7 @@ class Portfolio(models.Model):
 
     class Meta:
         unique_together = ("title", "game")
+        ordering = ['-created_on']
 
     def __str__(self):
         """
@@ -193,6 +197,9 @@ class Holding(models.Model):
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
 
+    class Meta:
+        ordering = ['-created_on']
+
     def __str__(self):
         """
         String representation of holding
@@ -255,6 +262,9 @@ class Transaction(models.Model):
     uid = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False
     )
+
+    class Meta:
+        ordering = ['-created_on']
 
     def __str__(self):
         """
