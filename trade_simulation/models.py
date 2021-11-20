@@ -242,7 +242,7 @@ class Transaction(models.Model):
 
     # Transactions are associated with certain portfolios
     portfolio = models.ForeignKey(
-        Portfolio, null=True, blank=True, on_delete=models.CASCADE
+        Portfolio, null=True, blank=True, on_delete=models.SET_NULL
     )
     ticker = models.TextField(max_length=200)
     trade_type = models.TextField(max_length=200)
