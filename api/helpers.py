@@ -1,6 +1,6 @@
 from .serializers import GameSerializer, PortfolioSerializer, HoldingSerializer
 from trade_simulation.models import Game, Portfolio, Holding
-from .utils import find_game_by_title, find_portfolio, find_holding
+from .utils import find_game_by_title, find_portfolio, find_holding, find_user_by_username
 
 
 def _get_game_standings_helper():
@@ -142,7 +142,7 @@ def _delete_portfolio_helper(title, game_title):
         raise Exception(error)
 
 
-def _post_portfolio_helper(title, game_title):
+def _post_portfolio_helper(title, game_title, username):
     """
     Helper function to create a new portfolio
     Returns: N/A or error
@@ -150,6 +150,12 @@ def _post_portfolio_helper(title, game_title):
     game = find_game_by_title(game_title)
     if not game:
         error = f"No game named {game_title}."
+        print(error)
+        raise Exception(error)
+
+    user = find_user_by_username(username)
+    if not user:
+        error = f"No user named {username}."
         print(error)
         raise Exception(error)
 
@@ -161,10 +167,12 @@ def _post_portfolio_helper(title, game_title):
 
     try:
         portfolio = Portfolio.objects.create()
+        portfolio.owner = user
         portfolio.game = game
         portfolio.cash_balance = float(game.starting_balance)
         portfolio.total_value = float(game.starting_balance)
         portfolio.title = title
+        print(user)
         portfolio.save()
         print(
             f"Successfully created new portfolio with title {title} in game {game_title}."

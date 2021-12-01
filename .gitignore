@@ -60,7 +60,7 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-zappa/trade_simulation/migrations/*.py
+trade_simulation/migrations/*.py
 
 # Flask stuff:
 instance/
