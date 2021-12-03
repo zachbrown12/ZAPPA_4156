@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import HoldingSerializer, TransactionSerializer
-from trade_simulation.models import Game, Portfolio, Holding, Transaction
+from .serializers import HoldingSerializer, OptionSerializer, TransactionSerializer
+from trade_simulation.models import Game, Portfolio, Holding, Option, Transaction
 from .helpers import (
     _get_game_standings_helper,
     _get_game_helper,
@@ -12,7 +12,9 @@ from .helpers import (
     _post_portfolio_helper,
     _delete_portfolio_helper,
     _trade_stock_helper,
+    _trade_option_helper,
     _get_holding_helper,
+    _get_option_helper,
 )
 
 GET_METHOD = "GET"
@@ -37,6 +39,8 @@ def getRoutes(request):
         {"POST": "/api/portfolio/trade"},
         {"GET": "/api/holdings"},
         {"GET": "/api/holding/port_title/game_title/ticker"},
+        {"GET": "/api/options"},
+        {"GET": "/api/option/port_title/game_title/contract"},
         {"GET": "/api/transactions"},
         {"GET": "/api/transaction/uid"},
     ]
@@ -127,17 +131,31 @@ def trade(request):
     """
     Function that handles buying or selling stock. This will update the transaction, holdings table.
     """
-    # If the trade type is a stock then set all the relevant data.
+    portfolio_title = request.data.get("portfolioTitle")
+    game_title = request.data.get("gameTitle")
     securityType = request.data.get("securityType")
+
+    # If the trade type is a stock then set all the relevant data.
     if securityType == "stock":
-        portfolio_title = request.data.get("portfolioTitle")
-        game_title = request.data.get("gameTitle")
         ticker = request.data.get("ticker")
         shares = request.data.get("shares")
+        exercise = None
+        if "exercise" in request.data:
+            exercise = request.data.get("exercise")
         try:
-            _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+            _trade_stock_helper(portfolio_title, game_title, ticker, shares, exercise=exercise)
         except Exception as e:
             return Response(status=500, data=str(e))
+
+    # If the trade type is an option then set all the relevant data.
+    if securityType == "option":
+        contract = request.data.get("contract")
+        quantity = request.data.get("quantity")
+        try:
+            _trade_option_helper(portfolio_title, game_title, contract, quantity)
+        except Exception as e:
+            return Response(status=500, data=str(e))
+
     return Response()
 
 
@@ -158,6 +176,27 @@ def handle_holding(request, game_title, port_title, ticker):
     """
     try:
         return Response(_get_holding_helper(port_title, game_title, ticker))
+    except Exception as e:
+        return Response(status=500, data=str(e))
+
+
+@api_view(["GET"])
+def handle_options(request):
+    """
+    Function that handles getting all active options.
+    """
+    options = Option.objects.all()
+    serializer = OptionSerializer(options, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def handle_option(request, game_title, port_title, contract):
+    """
+    Function that handles getting one option within a portfolio
+    """
+    try:
+        return Response(_get_option_helper(port_title, game_title, contract))
     except Exception as e:
         return Response(status=500, data=str(e))
 

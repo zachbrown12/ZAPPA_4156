@@ -1,4 +1,4 @@
-from trade_simulation.models import Game, Portfolio, Holding
+from trade_simulation.models import Game, Portfolio, Holding, Option
 
 
 def find_game_by_title(title):
@@ -40,4 +40,19 @@ def find_holding(title, game_title, ticker):
         return holding
     except Holding.DoesNotExist:
         print(f"No holding of ticker {ticker} in portfolio {title}.")
+        return None
+
+
+def find_option(title, game_title, contract):
+    """
+    Function that runs a query on the database to find one option.
+    """
+    portfolio = find_portfolio(title, game_title)
+    if not portfolio:
+        return
+    try:
+        option = Option.objects.get(portfolio=portfolio, contract=contract)
+        return option
+    except Option.DoesNotExist:
+        print(f"No holding of contract {contract} in portfolio {title}.")
         return None
