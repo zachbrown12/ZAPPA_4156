@@ -109,7 +109,8 @@ def handle_portfolio(request, game_title, port_title):
     # On a POST request create the portfolio or throw an error
     elif request.method == POST_METHOD:
         try:
-            _post_portfolio_helper(port_title, game_title)
+            username = request.data.get("username").lower()
+            _post_portfolio_helper(port_title, game_title, username)
             return Response()
         except Exception as e:
             return Response(status=500, data=str(e))

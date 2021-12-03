@@ -1,4 +1,5 @@
 from trade_simulation.models import Game, Portfolio, Holding
+from django.contrib.auth.models import User
 
 
 def find_game_by_title(title):
@@ -40,4 +41,16 @@ def find_holding(title, game_title, ticker):
         return holding
     except Holding.DoesNotExist:
         print(f"No holding of ticker {ticker} in portfolio {title}.")
+        return None
+
+
+def find_user_by_username(username):
+    """
+    Function that runs a query on the database to find user by username
+    """
+    try:
+        user = User.objects.get(username=username)
+        return user
+    except User.DoesNotExist:
+        print(f"No user found by username {username}")
         return None
