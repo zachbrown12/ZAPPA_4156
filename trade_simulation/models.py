@@ -24,7 +24,7 @@ class Game(models.Model):
     starting_balance = models.DecimalField(
         max_digits=14, decimal_places=2, default=10000.00
     )
-    rules = models.TextField(max_length=200)
+    rules = models.TextField(max_length=200, null=True, blank=True)
     # Winner is set once a user has won the game at the conclusion of the game
     winner = models.CharField(max_length=200, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
