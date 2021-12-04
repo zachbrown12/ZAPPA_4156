@@ -1,10 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
+import re
+from datetime import datetime
+from decimal import Decimal
 from yfinance import Ticker
 
 TRANSACTION_TYPE_BUY = "BUY"
 TRANSACTION_TYPE_SELL = "SELL"
+OPTION_TYPE_CALL = " CALL"
+OPTION_TYPE_PUT = " PUT"
+REGULAR_SHARES = 100.0
 
 
 class Game(models.Model):
@@ -119,7 +125,50 @@ class Portfolio(models.Model):
         transaction.bought_price = price
         transaction.save()
 
-    def buy_holding(self, ticker, shares):
+    def validate_exercise(self, ticker, shares, price, contract, option_type):
+        """
+        validate_exercise makes sure that contract c can be exercised to buy/sell s shares of ticker t
+        Returns: Option option or Exception if user cannot exercise c to buy/sell s shares of ticker t
+        """
+        if option_type == 'C':
+            option_type_text = "call"
+            flip = 1.0
+        elif option_type == 'P':
+            option_type_text = "put"
+            flip = -1.0
+        else:
+            error = "Option type was not specified."
+            print(error)
+            raise Exception(error)
+        try:
+            option = Option.objects.get(portfolio=self, contract=contract)
+        except Option.DoesNotExist:
+            error = f"Option {contract} is not in portfolio."
+            print(error)
+            raise Exception(error)
+        if option.ticker() != ticker:
+            error = f"Option {contract} is not for stock {ticker}."
+            print(error)
+            raise Exception(error)
+        if option.expiration() <= datetime.now():
+            error = f"Option {contract} has expired."
+            print(error)
+            raise Exception(error)
+        if option.option_type() != option_type:
+            error = f"Option {contract} is not a {option_type_text} option."
+            print(error)
+            raise Exception(error)
+        if float(option.quantity) * REGULAR_SHARES < shares:
+            error = f"Not enough shares available in option {contract}."
+            print(error)
+            raise Exception(error)
+        if flip * option.strike_price() >= flip * price:
+            warning = f"Warning: {option_type_text} option {contract} has a strike price of \
+                        {option.strike_price()}. Current price of {ticker} is {price}."
+            print(warning)
+        return option
+
+    def buy_holding(self, ticker, shares, exercise=None):
         """
         buy_holding allows a user to purchase s shares of ticker t to add to the portfolio
         Returns: N/A or Exception if user cannot purchase s shares of ticker t
@@ -127,26 +176,40 @@ class Portfolio(models.Model):
         holding, created = Holding.objects.get_or_create(portfolio=self, ticker=ticker)
         price = holding.ask_price()
         if price is None:
-            holding.delete()
+            if created:
+                holding.delete()
             error = f"Ticker {ticker} is not currently traded."
             print(error)
             raise Exception(error)
-        cost = price * float(shares)
+
+        # If a call option is being exercised, make sure it is valid and compute cost accordingly
+        if exercise:
+            option = self.validate_exercise(ticker, shares, price, exercise, 'C')
+            cost = option.strike_price() * float(shares)
+        else:
+            cost = price * float(shares)
+
         if float(self.cash_balance) < cost:
             error = f"Not enough cash to buy ${cost} in {shares} shares of {ticker}."
+            if created:
+                holding.delete()
             print(error)
             raise Exception(error)
         holding.shares = float(0 if holding.shares is None else holding.shares) + float(
             shares
         )
         holding.save()
-
         self.cash_balance = float(self.cash_balance) - cost
         self.save()
 
+        # If a call option was exercised, deduct shares from that option
+        if exercise and option:
+            option.quantity -= Decimal(shares / REGULAR_SHARES)
+            option.save()
+
         self.add_transaction(ticker, shares, price, TRANSACTION_TYPE_BUY)
 
-    def sell_holding(self, ticker, shares):
+    def sell_holding(self, ticker, shares, exercise=None):
         """
         sell_holding allows a user to sell s shares of ticker t currently in their portfolio
         Returns: N/A or Exception if user cannot sell s shares of ticker t
@@ -162,6 +225,14 @@ class Portfolio(models.Model):
             error = f"Ticker {ticker} is not currently traded."
             print(error)
             raise Exception(error)
+
+        # If a put option is being exercised, make sure it is valid and compute cost accordingly
+        if exercise:
+            option = self.validate_exercise(ticker, shares, price, exercise, 'P')
+            cost = option.strike_price() * float(shares)
+        else:
+            cost = price * float(shares)
+
         current_shares = float(0 if holding.shares is None else holding.shares)
         if current_shares < float(shares):
             error = f"Not enough shares of {ticker} to sell {shares} shares."
@@ -172,11 +243,83 @@ class Portfolio(models.Model):
             holding.delete()
         else:
             holding.save()
-
-        self.cash_balance = float(self.cash_balance) + (price * float(shares))
+        self.cash_balance = float(self.cash_balance) + cost
         self.save()
 
+        # If a put option was exercised, deduct shares from that option
+        if exercise and option:
+            option.quantity -= Decimal(shares / REGULAR_SHARES)
+            option.save()
+
         self.add_transaction(ticker, shares, price, TRANSACTION_TYPE_SELL)
+
+    def buy_option(self, contract, quantity):
+        """
+        buy_option allows a user to purchase <quantity> options of contract name <contract>
+        Returns: N/A or Exception if user cannot purchase specified quantity of said option
+        """
+        option, created = Option.objects.get_or_create(portfolio=self, contract=contract)
+        price = option.ask_price()
+        if price is None:
+            if created:
+                option.delete()
+            error = f"Contract {contract} is not currently available."
+            print(error)
+            raise Exception(error)
+        cost = price * float(quantity)
+        if float(self.cash_balance) < cost:
+            error = f"Not enough cash to buy ${cost} in {quantity} options of {contract}."
+            if created:
+                option.delete()
+            print(error)
+            raise Exception(error)
+        option.quantity = float(0 if option.quantity is None else option.quantity) + float(
+            quantity
+        )
+        option.save()
+
+        self.cash_balance = float(self.cash_balance) - cost
+        self.save()
+
+        if option.option_type() == 'C':
+            self.add_transaction(contract, quantity, price, TRANSACTION_TYPE_BUY + OPTION_TYPE_CALL)
+        elif option.option_type() == 'P':
+            self.add_transaction(contract, quantity, price, TRANSACTION_TYPE_BUY + OPTION_TYPE_PUT)
+
+    def sell_option(self, contract, quantity):
+        """
+        sell_option allows a user to sell <quantity> options of contract name <contract> from portfolio
+        Returns: N/A or Exception if user cannot sell specified quantity of said option
+        """
+        try:
+            option = Option.objects.get(portfolio=self, contract=contract)
+        except Option.DoesNotExist:
+            error = f"Contract {contract} is not in portfolio."
+            print(error)
+            raise Exception(error)
+        price = option.bid_price()
+        if price is None:
+            error = f"Contract {contract} is not currently available."
+            print(error)
+            raise Exception(error)
+        current_quantity = float(0 if option.quantity is None else option.quantity)
+        if current_quantity < float(quantity):
+            error = f"Not enough of {contract} in portfolio to sell {quantity} options."
+            print(error)
+            raise Exception(error)
+        option.quantity = current_quantity - float(quantity)
+        if option.quantity == 0.0:
+            option.delete()
+        else:
+            option.save()
+
+        self.cash_balance = float(self.cash_balance) + (price * float(quantity))
+        self.save()
+
+        if option.option_type() == 'C':
+            self.add_transaction(contract, quantity, price, TRANSACTION_TYPE_SELL + OPTION_TYPE_CALL)
+        elif option.option_type() == 'P':
+            self.add_transaction(contract, quantity, price, TRANSACTION_TYPE_SELL + OPTION_TYPE_PUT)
 
 
 class Holding(models.Model):
@@ -208,7 +351,7 @@ class Holding(models.Model):
 
     def ask_price(self):
         """
-        ask_price calls the yfinance API to compute the immediate price of the equity
+        ask_price calls the yfinance API to get the immediate buy price of the equity
         Returns: price of stock
         """
         tick = Ticker(str(self.ticker))
@@ -222,7 +365,7 @@ class Holding(models.Model):
 
     def bid_price(self):
         """
-        bid_price calls the yfinance API to compute the immediate price of the equity
+        bid_price calls the yfinance API to get the immediate sell price of the equity
         Returns: price of stock
         """
         stock_info = Ticker(str(self.ticker)).info
@@ -240,6 +383,108 @@ class Holding(models.Model):
         """
         price = self.bid_price() or 0.0
         return price * float(self.shares)
+
+
+class Option(models.Model):
+    """
+    Option represents the ability to buy or sell a stock at a specific
+    price before a certain time
+    """
+
+    # Each option associated with a portfolio
+    portfolio = models.ForeignKey(
+        Portfolio, null=True, blank=True, on_delete=models.CASCADE
+    )
+    contract = models.TextField(max_length=25)
+    quantity = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0.00, null=True
+    )
+    created_on = models.DateTimeField(auto_now_add=True)
+    uid = models.UUIDField(
+        default=uuid.uuid4, unique=True, primary_key=True, editable=False
+    )
+
+    class Meta:
+        ordering = ['-created_on']
+
+    def __str__(self):
+        """
+        String representation of option
+        """
+        return self.contract
+
+    def ticker(self):
+        """
+        Return the stock ticker that this option is for
+        """
+        return re.split(r'(\d+)', self.contract)[0]
+
+    def expiration(self):
+        """
+        Return the expiration date of this option in datetime format
+        """
+        exp = re.split(r'(\d+)', self.contract)[1]
+        try:
+            return datetime(2000 + int(exp[0:2]), int(exp[2:4]), int(exp[4:6]), 0, 0)
+        except ValueError:
+            return None
+
+    def option_type(self):
+        """
+        Return the type of option: 'C' for call, 'P' for put
+        """
+        return re.split(r'(\d+)', self.contract)[2]
+
+    def strike_price(self):
+        """
+        Return the strike price of this option, derived from contract symbol
+        """
+        return float(re.split(r'(\d+)', self.contract)[3]) / 1000.0
+
+    def get_info(self):
+        """
+        Calls the yfinance API to get information on a specific option contract
+        Returns: dict with info on option contract
+        """
+        tick = Ticker(str(self.ticker()))
+        expdate = str(self.expiration().date())
+        if not expdate:
+            return None
+        if self.option_type() == 'C':
+            options = tick.option_chain(date=expdate).calls.set_index('contractSymbol').T.to_dict()
+        elif self.option_type() == 'P':
+            options = tick.option_chain(date=expdate).puts.set_index('contractSymbol').T.to_dict()
+        else:
+            return None
+        if self.contract not in options:
+            return None
+        return options.get(self.contract)
+
+    def ask_price(self):
+        """
+        ask_price calls the yfinance API to get the immediate buy price of a contract
+        Returns: price of contract (1 regular option is REGULAR_SHARES shares)
+        """
+        info = self.get_info()
+        if not info:
+            return None
+        # Based on yfinance API restrictions to market hours, we return lastPrice if after market hours
+        if not info.get("ask"):
+            return float(info.get("lastPrice")) * REGULAR_SHARES
+        return float(info.get("ask")) * REGULAR_SHARES
+
+    def bid_price(self):
+        """
+        bid_price calls the yfinance API to get the immediate sell price of a contract
+        Returns: price of contract (1 regular option is REGULAR_SHARES shares)
+        """
+        info = self.get_info()
+        if not info:
+            return None
+        # Based on yfinance API restrictions to market hours, we return lastPrice if after market hours
+        if not info.get("bid"):
+            return float(info.get("lastPrice")) * REGULAR_SHARES
+        return float(info.get("bid")) * REGULAR_SHARES
 
 
 class Transaction(models.Model):

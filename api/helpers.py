@@ -1,6 +1,6 @@
-from .serializers import GameSerializer, PortfolioSerializer, HoldingSerializer
-from trade_simulation.models import Game, Portfolio, Holding
-from .utils import find_game_by_title, find_portfolio, find_holding, find_user_by_username
+from .serializers import GameSerializer, PortfolioSerializer, HoldingSerializer, OptionSerializer
+from trade_simulation.models import Game, Portfolio, Holding, Option
+from .utils import find_game_by_title, find_portfolio, find_holding, find_option, find_user_by_username
 
 
 def _get_game_standings_helper():
@@ -28,6 +28,7 @@ def _get_game_helper(game_title):
         error = f"Could not find game with title {game_title}."
         print(error)
         raise Exception(error)
+    game.rank_portfolios()
     try:
         serializer = GameSerializer(game, many=False)
         print(f"Returning game standings: {serializer.data}.")
@@ -183,7 +184,7 @@ def _post_portfolio_helper(title, game_title, username):
         raise Exception(error)
 
 
-def _trade_stock_helper(title, game_title, ticker, shares):
+def _trade_stock_helper(title, game_title, ticker, shares, exercise=None):
     """
     Helper function to buy or sell a stock
     Returns: N/A
@@ -196,31 +197,35 @@ def _trade_stock_helper(title, game_title, ticker, shares):
         print(error)
         raise Exception(error)
     if shares > 0:
-        _buy_stock_helper(portfolio, ticker, shares)
+        portfolio.buy_holding(ticker, shares, exercise=exercise)
+        print(f"Portfolio {title} purchased {shares} shares of {ticker}.")
+        if exercise:
+            print(f"Exercised option {exercise}.")
     elif shares < 0:
-        _sell_stock_helper(portfolio, ticker, -shares)
+        portfolio.sell_holding(ticker, -shares, exercise=exercise)
+        print(f"Portfolio {title} sold {-shares} shares of {ticker}.")
+        if exercise:
+            print(f"Exercised option {exercise}.")
 
 
-# TODO:combining sellholding and buyholding
-def _buy_stock_helper(portfolio, ticker, shares):
+def _trade_option_helper(title, game_title, contract, quantity):
     """
-    Helper function to buy a holding
+    Helper function to buy or sell an option
     Returns: N/A
     """
-    portfolio.buy_holding(ticker, shares)
-    print(f"Portfolio id={portfolio.uid} purchased {shares} shares of {ticker}")
-
-
-# TODO:combining sellholding and buyholding
-def _sell_stock_helper(portfolio, ticker, shares):
-    """
-    Helper function to sell a holding
-    Returns: N/A
-    """
-    print("sell helper")
+    portfolio = find_portfolio(title, game_title)
+    print("portfolio here")
     print(portfolio)
-    portfolio.sell_holding(ticker, shares)
-    print(f"Portfolio id={portfolio.uid} sold {shares} shares of {ticker}")
+    if not portfolio:
+        error = f"Cannot find portfolio {title} in game {game_title}."
+        print(error)
+        raise Exception(error)
+    if quantity > 0:
+        portfolio.buy_option(contract, quantity)
+        print(f"Portfolio {title} purchased {quantity} options of {contract}.")
+    elif quantity < 0:
+        portfolio.sell_option(contract, -quantity)
+        print(f"Portfolio {title} sold {-quantity} options of {contract}.")
 
 
 def _get_holding_helper(portfolio_title, game_title, ticker):
@@ -243,6 +248,31 @@ def _get_holding_helper(portfolio_title, game_title, ticker):
         print(f"Successfully fetched holding id={holding.uid}: {serializer.data}")
         return serializer.data
     except Holding.DoesNotExist:
-        error = "Error occurs when serializing the holding portfolio."
+        error = "Error occurs when serializing the holdings in portfolio."
+        print(error)
+        raise Exception(error)
+
+
+def _get_option_helper(portfolio_title, game_title, contract):
+    """
+    Helper function to fetch a particular holding in a portfolio
+    Returns: Holding data or error
+    """
+    portfolio = find_portfolio(portfolio_title, game_title)
+    if not portfolio:
+        error = f"Cannot find portfolio {portfolio_title} in game {game_title}."
+        print(error)
+        raise Exception(error)
+    option = find_option(portfolio_title, game_title, contract)
+    if not option:
+        error = f"Cannot find option {contract} in portfolio {portfolio_title} in game {game_title}."
+        print(error)
+        raise Exception(error)
+    try:
+        serializer = OptionSerializer(option, many=False)
+        print(f"Successfully fetched option id={option.uid}: {serializer.data}")
+        return serializer.data
+    except Option.DoesNotExist:
+        error = "Error occurs when serializing the options in portfolio."
         print(error)
         raise Exception(error)

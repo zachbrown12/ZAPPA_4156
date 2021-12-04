@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from trade_simulation.models import Game, Portfolio, Holding, Transaction
+from trade_simulation.models import Game, Portfolio, Holding, Option, Transaction
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,12 +38,22 @@ class HoldingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OptionSerializer(serializers.ModelSerializer):
+    """
+    Option Serializer serializes all the fields in Option to a useable object.
+    """
+    class Meta:
+        model = Option
+        fields = '__all__'
+
+
 class PortfolioSerializer(serializers.ModelSerializer):
     """
     Portfolio Serializer serializers all the fields in Portfolio to a useable object.
     """
     owner = UserSerializer(many=False)
     holdings = serializers.SerializerMethodField()
+    options = serializers.SerializerMethodField()
 
     class Meta:
         model = Portfolio
@@ -53,6 +63,12 @@ class PortfolioSerializer(serializers.ModelSerializer):
     def get_holdings(self, obj):
         holdings = obj.holding_set.all()
         serializer = HoldingSerializer(holdings, many=True)
+        return serializer.data
+
+    # The below code allows us to show the details of the options within a portfolio.
+    def get_options(self, obj):
+        options = obj.option_set.all()
+        serializer = OptionSerializer(options, many=True)
         return serializer.data
 
 
