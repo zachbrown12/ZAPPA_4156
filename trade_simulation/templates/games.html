@@ -1,0 +1,19 @@
+<h1>Games</h1>
+<hr>
+
+<table>
+    <tr>
+        <th>Game</th>
+        <th>Starting Balance</th>
+        <th>Winner</th>
+        <th></th>
+    </tr>
+    {% for game in games %}
+        <tr>
+            <td>{{game.title}}&nbsp;&nbsp;&nbsp;</td>
+            <td>{{game.starting_balance}}&nbsp;&nbsp;&nbsp;</td>
+            <td>{{game.winner}}&nbsp;&nbsp;&nbsp;</td>
+            <td><a href="{% url 'game' game.title %}">View</a></td>
+        </tr>
+    {% endfor %}
+</table>

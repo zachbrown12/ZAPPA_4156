@@ -32,7 +32,7 @@ def login_user(request):
         else:
             messages.error(request, "Username or password is incorrect")
 
-    return render(request, "users/login_register.html")
+    return render(request, "login_register.html")
 
 
 def register_user(request):
@@ -59,7 +59,7 @@ def register_user(request):
             messages.error(request, "An error has occurred during registration!")
 
     context = {"page": page, "form": form}
-    return render(request, "users/login_register.html", context)
+    return render(request, "login_register.html", context)
 
 
 def logout_user(request):
@@ -74,4 +74,4 @@ def profiles(request):
     """
     Render profile page
     """
-    return render(request, "users/profiles.html")
+    return render(request, "profiles.html")

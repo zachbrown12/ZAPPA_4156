@@ -1,0 +1,45 @@
+<h1>{{game.title}}</h1>
+<hr>
+
+<div>
+    <p>Title: {{game.title}} </p>
+    <p>Starting balance: {{game.starting_balance}}</p>
+    <p>Rules: {{game.rules}}</p>
+    <p>Winner: {{game.winner}}</p>
+    <p>Created on: {{game.created_on}}</p>
+    <p>uid: {{game.uid}}</p>
+</div>
+
+<hr>
+
+{% if portfolios %}
+<table>
+    <tr>
+        <th>Portfolio</th>
+        <th>rank</th>
+        <th>owner</th>
+        <th>cash balance</th>
+        <th>total value</th>
+    </tr>
+    <tr>
+        {% for portfolio in portfolios %}
+            <tr>
+                <td>{{portfolio.title}}&nbsp;&nbsp;&nbsp;</td>
+                <td>{{portfolio.game_rank}}&nbsp;&nbsp;&nbsp;</td>
+                <td>{{portfolio.owner.username}}&nbsp;&nbsp;&nbsp;</td>
+                <td>{{portfolio.cashbalance}}&nbsp;&nbsp;&nbsp;</td>
+                <td>{{portfolio.total_value}}&nbsp;&nbsp;&nbsp;</td>
+            </tr>
+        {% endfor %}
+    </tr>
+</table>
+
+{% else %}
+<p>No portfolio in the game</p>
+
+{% endif %}
+
+<hr>
+
+<a href="{% url 'games' %}">back</a>
+
