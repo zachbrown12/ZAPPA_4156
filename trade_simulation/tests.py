@@ -1,5 +1,5 @@
 from django.test import TestCase
-import mock
+import unittest.mock as mock
 from unittest.mock import PropertyMock
 from .models import Game, Portfolio, Holding, Transaction
 from django.contrib.auth.models import User

@@ -1,9 +1,10 @@
 from django.test import TestCase
-import mock
+import unittest.mock as mock
 import requests
 from django.http import HttpRequest
 import json
 from trade_simulation.models import Game, Portfolio, Holding, Transaction
+from django.contrib.auth.models import User
 from api.helpers import (
     _get_game_standings_helper,
     _get_game_helper,
@@ -14,8 +15,6 @@ from api.helpers import (
     _delete_portfolio_helper,
     _post_portfolio_helper,
     _trade_stock_helper,
-    _buy_stock_helper,
-    _sell_stock_helper,
     _get_holding_helper,
 )
 from api.views import (
@@ -29,10 +28,16 @@ from api.views import (
     handle_transactions,
     handle_transaction,
 )
-from .utils import find_game_by_title, find_portfolio
+from .utils import find_game_by_title, find_portfolio, find_holding
 
 
 class HelperTestCase(TestCase):
+
+    def setUp(self):
+        self.test_user = User.objects.create_user(username='test_user',
+                                                  email='test@user.com',
+                                                  password='12345')
+
     def _test_create_game_helper_success(self):
         """
         Test that we can successfully create a game
@@ -153,7 +158,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
 
         # WHEN
         portfolio = _get_portfolio_helper(portfolio_title, game_title)
@@ -183,7 +188,7 @@ class HelperTestCase(TestCase):
         _create_game_helper(game_title, "test rules", 10000)
         for i in range(3):
             portfolio_title = f"Portfolio Title {i}"
-            _post_portfolio_helper(portfolio_title, game_title)
+            _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN
         portfolios = _get_portfolios_helper()
         # THEN
@@ -211,7 +216,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN
         _delete_portfolio_helper(portfolio_title, game_title)
         # THEN
@@ -230,7 +235,7 @@ class HelperTestCase(TestCase):
         with self.assertRaises(Exception):
             _delete_portfolio_helper(portfolio_title, game_title)
 
-    @mock.patch("api.helpers._buy_stock_helper", return_value=None)
+    @mock.patch("api.helpers._trade_stock_helper", return_value=None)
     def test_trade_stock_helper_success_buy(self, mock_buy_stock):
         """
         Test that we buy a stock successfully if shares > 0
@@ -239,16 +244,16 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
         # WHEN
         _trade_stock_helper(portfolio_title, game_title, ticker, shares)
         # THEN
-        portfolio = find_portfolio(portfolio_title, game_title)
-        mock_buy_stock.assert_called_with(portfolio, ticker, shares)
+        holding = find_holding(portfolio_title, game_title, ticker)
+        assert holding.shares == shares
 
-    @mock.patch("api.helpers._sell_stock_helper")
+    @mock.patch("api.helpers._trade_stock_helper")
     def test_trade_stock_helper_success_sell(self, mock_sell_stock):
         """
         Test that we sell a stock successfully if shares < 0
@@ -257,14 +262,15 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
-        shares = -3
+        shares = 3
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares + 1)
         # WHEN
-        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        _trade_stock_helper(portfolio_title, game_title, ticker, -shares)
         # THEN
-        portfolio = find_portfolio(portfolio_title, game_title)
-        mock_sell_stock.assert_called_with(portfolio, ticker, shares)
+        holding = find_holding(portfolio_title, game_title, ticker)
+        assert holding.shares == 1
 
     def test_trade_stock_helper_error(self):
         """
@@ -287,14 +293,13 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
-        portfolio = find_portfolio(portfolio_title, game_title)
         # WHEN
-        _buy_stock_helper(portfolio, ticker, shares)
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
         # THEN
-        buy_mock.assert_called_with(ticker, shares)
+        buy_mock.assert_called_with(ticker, shares, exercise=None)
 
     @mock.patch("trade_simulation.models.Portfolio.sell_holding")
     def test_sell_stock_helper_success(self, sell_mock):
@@ -305,14 +310,13 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = -3
-        portfolio = find_portfolio(portfolio_title, game_title)
         # WHEN
-        _sell_stock_helper(portfolio, ticker, shares)
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
         # THEN
-        sell_mock.assert_called_with(ticker, shares)
+        sell_mock.assert_called_with(ticker, -shares, exercise=None)
 
     def test_get_holding_helper_success(self):
         """
@@ -322,7 +326,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
         _trade_stock_helper(portfolio_title, game_title, ticker, shares)
@@ -394,7 +398,7 @@ class HelperTestCase(TestCase):
         request.POST = {'rules': ['kill or be killed'], 'startingBalance': ['15000']}
         _create_game_helper(game_title, "test rules", 10000)
         # WHEN / THEN
-        self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
+        self.assertEqual(handle_game(request, game_title).status_code, 500)
 
     def test_handle_game_delete_fail(self):
         """
@@ -420,7 +424,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolios(request).status_code, 200)
 
@@ -435,7 +439,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "Game Title", "Portfolio Title").status_code, 200)
 
@@ -450,7 +454,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
 
@@ -465,7 +469,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
 
@@ -480,7 +484,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
 
@@ -496,7 +500,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
 
@@ -511,7 +515,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
         _trade_stock_helper(portfolio_title, game_title, ticker, shares)
@@ -529,7 +533,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
         _trade_stock_helper(portfolio_title, game_title, ticker, shares)
@@ -547,7 +551,7 @@ class HelperTestCase(TestCase):
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
-        _post_portfolio_helper(portfolio_title, game_title)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
         _trade_stock_helper(portfolio_title, game_title, ticker, shares)
