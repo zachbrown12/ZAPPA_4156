@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<head>
+    <style>
+    table, th, td {
+        border: 1px solid black;
+    }
+    </style>
+</head>
+
+<h1>Portfolio</h1>
+<hr>
+
+<h2>{{portfolio.title}}</h2>
+<hr>
+
+<div>
+    <p>Title: {{portfolio.title}} </p>
+    <p>Owner: {{portfolio.owner}}</p>
+    <p>Game rank: {{portfolio.game_rank}}</p>
+    <p>Cash balance: $ {{portfolio.cash_balance}}</p>
+    <p>Total value: $ {{portfolio.total_value}}</p>
+    <p>Created on: {{portfolio.created_on}}</p>
+    <p>uid: {{portfolio.uid}}</p>
+</div>
+
+<hr>
+
+<table>
+    <tr>
+        <th>Ticker</th>
+        <th>Shares</th>
+        <th>Market value</th>
+    </tr>
+    {% for holding in holdings %}
+        <tr>
+            <td>{{holding.ticker}}&nbsp;&nbsp;&nbsp;</td>
+            <td>$ {{holding.shares}}&nbsp;&nbsp;&nbsp;</td>
+            <td>$ {{holding.market_value}}&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<a href="{% url 'game' portfolio.game.uid %}">back</a>
+
