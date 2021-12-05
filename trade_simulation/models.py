@@ -136,10 +136,6 @@ class Portfolio(models.Model):
         elif option_type == 'P':
             option_type_text = "put"
             flip = -1.0
-        else:
-            error = "Option type was not specified."
-            print(error)
-            raise Exception(error)
         try:
             option = Option.objects.get(portfolio=self, contract=contract)
         except Option.DoesNotExist:
@@ -185,9 +181,8 @@ class Portfolio(models.Model):
         # If a call option is being exercised, make sure it is valid and compute cost accordingly
         if exercise:
             option = self.validate_exercise(ticker, shares, price, exercise, 'C')
-            cost = option.strike_price() * float(shares)
-        else:
-            cost = price * float(shares)
+            price = option.strike_price()
+        cost = price * float(shares)
 
         if float(self.cash_balance) < cost:
             error = f"Not enough cash to buy ${cost} in {shares} shares of {ticker}."
@@ -229,9 +224,8 @@ class Portfolio(models.Model):
         # If a put option is being exercised, make sure it is valid and compute cost accordingly
         if exercise:
             option = self.validate_exercise(ticker, shares, price, exercise, 'P')
-            cost = option.strike_price() * float(shares)
-        else:
-            cost = price * float(shares)
+            price = option.strike_price()
+        cost = price * float(shares)
 
         current_shares = float(0 if holding.shares is None else holding.shares)
         if current_shares < float(shares):
@@ -447,13 +441,14 @@ class Option(models.Model):
         Returns: dict with info on option contract
         """
         tick = Ticker(str(self.ticker()))
-        expdate = str(self.expiration().date())
-        if not expdate:
+        if not self.expiration():
             return None
+        expdate = str(self.expiration().date())
+        df = tick.option_chain(date=expdate)
         if self.option_type() == 'C':
-            options = tick.option_chain(date=expdate).calls.set_index('contractSymbol').T.to_dict()
+            options = df.calls.set_index('contractSymbol').T.to_dict()
         elif self.option_type() == 'P':
-            options = tick.option_chain(date=expdate).puts.set_index('contractSymbol').T.to_dict()
+            options = df.puts.set_index('contractSymbol').T.to_dict()
         else:
             return None
         if self.contract not in options:
@@ -469,7 +464,7 @@ class Option(models.Model):
         if not info:
             return None
         # Based on yfinance API restrictions to market hours, we return lastPrice if after market hours
-        if not info.get("ask"):
+        if float(info.get("ask")) == 0:
             return float(info.get("lastPrice")) * REGULAR_SHARES
         return float(info.get("ask")) * REGULAR_SHARES
 
@@ -482,7 +477,7 @@ class Option(models.Model):
         if not info:
             return None
         # Based on yfinance API restrictions to market hours, we return lastPrice if after market hours
-        if not info.get("bid"):
+        if float(info.get("bid")) == 0:
             return float(info.get("lastPrice")) * REGULAR_SHARES
         return float(info.get("bid")) * REGULAR_SHARES
 
