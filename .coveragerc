@@ -1,0 +1,12 @@
+[run]
+omit =
+    */__*
+    */test*.py
+    htmlcov/*
+    */admin.py
+    */apps.py
+    trade_simulation/urls.py
+    trade_simulation/views.py
+    trade_simulation/migrations/*
+    zappa/*
+    manage.py
