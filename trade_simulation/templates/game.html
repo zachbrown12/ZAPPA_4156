@@ -1,9 +1,21 @@
-<h1>{{game.title}}</h1>
+<!DOCTYPE html>
+<head>
+    <style>
+    table, th, td {
+        border: 1px solid black;
+    }
+    </style>
+</head>
+
+<h1>Game</h1>
+<hr>
+
+<h2>{{game.title}}</h2>
 <hr>
 
 <div>
     <p>Title: {{game.title}} </p>
-    <p>Starting balance: {{game.starting_balance}}</p>
+    <p>Starting balance: $ {{game.starting_balance}}</p>
     <p>Rules: {{game.rules}}</p>
     <p>Winner: {{game.winner}}</p>
     <p>Created on: {{game.created_on}}</p>
@@ -16,10 +28,11 @@
 <table>
     <tr>
         <th>Portfolio</th>
-        <th>rank</th>
-        <th>owner</th>
-        <th>cash balance</th>
-        <th>total value</th>
+        <th>Rank</th>
+        <th>Owner</th>
+        <th>Cash balance</th>
+        <th>Total value</th>
+        <th></th>
     </tr>
     <tr>
         {% for portfolio in portfolios %}
@@ -27,8 +40,9 @@
                 <td>{{portfolio.title}}&nbsp;&nbsp;&nbsp;</td>
                 <td>{{portfolio.game_rank}}&nbsp;&nbsp;&nbsp;</td>
                 <td>{{portfolio.owner.username}}&nbsp;&nbsp;&nbsp;</td>
-                <td>{{portfolio.cashbalance}}&nbsp;&nbsp;&nbsp;</td>
-                <td>{{portfolio.total_value}}&nbsp;&nbsp;&nbsp;</td>
+                <td>$ {{portfolio.cash_balance}}&nbsp;&nbsp;&nbsp;</td>
+                <td>$ {{portfolio.total_value}}&nbsp;&nbsp;&nbsp;</td>
+                <td><a href="{% url 'portfolio' portfolio.uid %}">View</a></td>
             </tr>
         {% endfor %}
     </tr>
