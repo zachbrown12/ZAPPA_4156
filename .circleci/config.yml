@@ -49,3 +49,6 @@ workflows:
   say-hello-workflow:
    jobs:
       - say-hello
+      - build
+      - test
+      - flake8
