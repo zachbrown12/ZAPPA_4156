@@ -1,57 +1,25 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+orbs:
+  python: circleci/python@1.0.0
 jobs:
-
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-
-  # Build
   build:
     docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+      - image: cimg/python:3.6.10
+        environment:
+          DATABASE_URL: database-1.c8j9g5p5qd7q.us-east-2.rds.amazonaws.com
+      - image: circleci/postgres:9.6.2
+        environment:
+          POSTGRES_USER: zappa
+          POSTGRES_DB: incaroads
     steps:
-      - run: python .\manage.py runserver
-
-  # Run all tests and generate coverage
-  test:
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - run: coverage run --source='.' manage.py test
-
-  # Run flake8 and generate output to bugs.txt
-  flake8:
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - run: python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv > bugs.txt
-    
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  say-hello-workflow:
-   jobs:
-      - say-hello
-      - build
-      - test
-      - flake8
+      - checkout
+      - python/install-packages
+      - run:
+          name: Run django tests
+          command: |
+            pipenv run python manage.py test
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: tr1
