@@ -1,8 +1,5 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 import unittest.mock as mock
-import requests
-from django.http import HttpRequest
-import json
 from trade_simulation.models import Game, Portfolio, Holding, Transaction
 from django.contrib.auth.models import User
 from api.helpers import (
@@ -20,6 +17,7 @@ from api.helpers import (
     _get_option_helper,
 )
 from api.views import (
+    getRoutes,
     handle_games,
     handle_game,
     handle_portfolios,
@@ -263,6 +261,30 @@ class HelperTestCase(TestCase):
         with self.assertRaises(Exception):
             _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
 
+    def test_create_portfolio_no_username(self):
+        """
+        Test that creating a portfolio in a game without specifying a username throws an exception
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        with self.assertRaises(Exception):
+            _post_portfolio_helper(portfolio_title, game_title, None)
+
+    def test_create_portfolio_username_not_found(self):
+        """
+        Test that creating a portfolio in a game with a bad username throws an exception
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        with self.assertRaises(Exception):
+            _post_portfolio_helper(portfolio_title, game_title, "ldsakfkwdsj")
+
     @mock.patch("trade_simulation.models.Holding.ask_price", return_value=200)
     def test_trade_stock_helper_success_buy(self, mock_buy_stock):
         """
@@ -464,14 +486,30 @@ class HelperTestCase(TestCase):
         with self.assertRaises(Exception):
             _get_option_helper(portfolio_title, game_title, "AAPL211223C00148000")
 
+
+class ViewTestCase(TestCase):
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.test_user = User.objects.create_user(username='test_user',
+                                                  email='test@user.com',
+                                                  password='12345')
+
+    def test_routes(self):
+        """
+        Test that we can get the routes listing
+        """
+        # GIVEN
+        request = self.factory.get('')
+        # WHEN/THEN
+        self.assertEqual(getRoutes(request).status_code, 200)
+
     def test_handle_games_success(self):
         """
         Test that we can get a game successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/games/'
+        request = self.factory.get('/games/')
         game_title = "Game Title"
         _create_game_helper(game_title, "test rules", 10000)
         # WHEN / THEN
@@ -482,9 +520,7 @@ class HelperTestCase(TestCase):
         Test that we can get a game successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/game/'
+        request = self.factory.get('/game/')
         game_title = "Game Title"
         _create_game_helper(game_title, "test rules", 10000)
         # WHEN / THEN
@@ -495,36 +531,51 @@ class HelperTestCase(TestCase):
         Tests failure on getting a game when it does not exist.
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/game/'
+        request = self.factory.get('/game/')
         game_title = "Game Title"
         _create_game_helper(game_title, "test rules", 10000)
         # WHEN / THEN
         self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
+
+    def test_handle_game_post(self):
+        """
+        Tests that we can create a game successfully
+        """
+        # GIVEN
+        request = self.factory.post('/game/')
+        game_title = "Game Title"
+        # WHEN / THEN
+        self.assertEqual(handle_game(request, game_title).status_code, 200)
 
     def test_handle_game_post_fail(self):
         """
         Tests failure on creating games
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'POST'
-        request.path = '/api/game/'
+        data = {'rules': 'kill or be killed', 'startingBalance': 15000}
+        request = self.factory.post('/game/', data)
         game_title = "Game Title"
-        request.POST = {'rules': ['kill or be killed'], 'startingBalance': ['15000']}
         _create_game_helper(game_title, "test rules", 10000)
         # WHEN / THEN
         self.assertEqual(handle_game(request, game_title).status_code, 500)
 
-    def test_handle_game_delete_fail(self):
+    def test_handle_game_delete(self):
         """
-        Tests failure on deleteing games
+        Tests we can delete a game successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'DELETE'
-        request.path = '/api/game/'
+        request = self.factory.delete('/game/')
+        game_title = "Game Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_game(request, game_title).status_code, 200)
+
+    def test_handle_game_delete_fail(self):
+        """
+        Tests failure on deleting games
+        """
+        # GIVEN
+        request = self.factory.delete('/game/')
         game_title = "Game Title"
         _create_game_helper(game_title, "test rules", 10000)
         # WHEN / THEN
@@ -535,9 +586,7 @@ class HelperTestCase(TestCase):
         Test that we can get all portfolios successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/portfolios/'
+        request = self.factory.get('/portfolios/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -550,9 +599,7 @@ class HelperTestCase(TestCase):
         Test that we can get a portfolio successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/portfolio/'
+        request = self.factory.get('/portfolio/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -565,9 +612,7 @@ class HelperTestCase(TestCase):
         Tests failure on getting a portfolio when it does not exist.
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/portfolio/'
+        request = self.factory.get('/portfolio/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -575,29 +620,64 @@ class HelperTestCase(TestCase):
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
 
-    def test_handle_portfolio_post_fail(self):
+    def test_handle_portfolio_post(self):
         """
-        Tests failure on creating portfolios
+        Tests that we can create a portfolio successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'POST'
-        request.path = '/api/portfolio/'
+        data = {"username": self.test_user.username}
+        request = self.factory.post('/portfolio/', data)
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 200)
+
+    def test_handle_portfolio_post_already_exists(self):
+        """
+        Tests failure on creating portfolio if one of the same name already exists in game
+        """
+        # GIVEN
+        data = {"username": self.test_user.username}
+        request = self.factory.post('/portfolio/', data)
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
-        self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
+        self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 500)
+
+    def test_handle_portfolio_post_missing_username(self):
+        """
+        Tests failure on creating portfolio if username is missing from the request
+        """
+        # GIVEN
+        request = self.factory.post('/portfolio/')
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 500)
+
+    def test_handle_portfolio_delete(self):
+        """
+        Tests we can delete a portfolio successfully
+        """
+        # GIVEN
+        request = self.factory.delete('/portfolio/')
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        # WHEN / THEN
+        self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 200)
 
     def test_handle_portfolio_delete_fail(self):
         """
-        Tests failure on deleteing portfolios
+        Tests failure on deleting portfolios
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'DELETE'
-        request.path = '/api/portfolio/'
+        request = self.factory.delete('/portfolio/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -605,30 +685,129 @@ class HelperTestCase(TestCase):
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
 
-    def test_handle_trade_post_fail(self):
+    @mock.patch("api.helpers._trade_stock_helper", return_value=None)
+    def test_trade_buy_stock(self, mock_trade):
         """
-        Tests failure on creating trades
+        Tests we can buy a stock successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'POST'
-        request.path = '/api/portfolio/trade'
-        request.POST = {'securityType': ['Blah']}
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        data = {"portfolioTitle": portfolio_title,
+                "gameTitle": game_title,
+                "securityType": "stock",
+                "ticker": "AAPL",
+                "shares": 4.0,
+                }
+        request = self.factory.post('/portfolio/trade', data)
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        # WHEN / THEN
+        self.assertEqual(trade(request).status_code, 200)
+
+    @mock.patch("api.helpers._trade_stock_helper", return_value=None)
+    def test_trade_buy_stock_bad_ticker(self, mock_trade):
+        """
+        Tests that a buying a stock with invalid ticker raises an error
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        data = {"portfolioTitle": portfolio_title,
+                "gameTitle": game_title,
+                "securityType": "stock",
+                "ticker": "AAPX",
+                "shares": 4.0,
+                }
+        request = self.factory.post('/portfolio/trade', data)
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        # WHEN / THEN
+        self.assertEqual(trade(request).status_code, 500)
+
+    @mock.patch("api.helpers._trade_option_helper", return_value=None)
+    def test_trade_buy_call_option(self, mock_trade):
+        """
+        Tests we can buy a call option successfully
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        data = {"portfolioTitle": portfolio_title,
+                "gameTitle": game_title,
+                "securityType": "option",
+                "contract": "AAPL211223C00148000",
+                "quantity": 1.0
+                }
+        request = self.factory.post('/portfolio/trade', data)
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        # WHEN / THEN
+        self.assertEqual(trade(request).status_code, 200)
+
+    @mock.patch("api.helpers._trade_option_helper", return_value=None)
+    def test_trade_buy_call_option_bad_contractname(self, mock_trade):
+        """
+        Tests that buying an option with a bad contract name raises an error
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        data = {"portfolioTitle": portfolio_title,
+                "gameTitle": game_title,
+                "securityType": "option",
+                "contract": "AAPL211223X00148000",
+                "quantity": 1.0
+                }
+        request = self.factory.post('/portfolio/trade', data)
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        # WHEN / THEN
+        self.assertEqual(trade(request).status_code, 500)
+
+    @mock.patch("api.helpers._trade_stock_helper", return_value=None)
+    def test_trade_buy_stock_exercise(self, mock_trade):
+        """
+        Tests we can buy a stock while exercising a call option successfully
+        """
+        # GIVEN
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        contract = "AAPL211223C00148000"
+        data = {"portfolioTitle": portfolio_title,
+                "gameTitle": game_title,
+                "securityType": "stock",
+                "ticker": "AAPL",
+                "shares": 4.0,
+                "exercise": contract,
+                }
+        request = self.factory.post('/portfolio/trade', data)
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        _trade_option_helper(portfolio_title, game_title, contract, 1.0)
+        # WHEN / THEN
+        self.assertEqual(trade(request).status_code, 200)
+
+    def test_trade_bad_security_type(self):
+        """
+        Tests trade failure on bad security type
+        """
+        # GIVEN
+        data = {'securityType': 'Blah'}
+        request = self.factory.post('/portfolio/trade', data)
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
-        self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
+        self.assertEqual(trade(request).status_code, 500)
 
     def test_handle_holdings_success(self):
         """
         Test that we can get all holdings successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/holdings/'
+        request = self.factory.get('/holdings/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -644,9 +823,7 @@ class HelperTestCase(TestCase):
         Test that we can get a holding successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/holding/'
+        request = self.factory.get('/holding/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -662,9 +839,7 @@ class HelperTestCase(TestCase):
         Test that a holding not found raises an exception
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/holding/'
+        request = self.factory.get('/holding/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -678,9 +853,7 @@ class HelperTestCase(TestCase):
         Test that we can get all options successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/options/'
+        request = self.factory.get('/options/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -696,9 +869,7 @@ class HelperTestCase(TestCase):
         Test that we can get an option successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/holdings/'
+        request = self.factory.get('/option/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -714,9 +885,7 @@ class HelperTestCase(TestCase):
         Test that an option not found raises an exception
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/holdings/'
+        request = self.factory.get('/option/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -730,9 +899,7 @@ class HelperTestCase(TestCase):
         Test that we can get all transactions successfully
         """
         # GIVEN
-        request = HttpRequest()
-        request.method = 'GET'
-        request.path = '/api/holdings/'
+        request = self.factory.get('/transactions/')
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
         _create_game_helper(game_title, "test rules", 10000)
@@ -742,3 +909,36 @@ class HelperTestCase(TestCase):
         _trade_stock_helper(portfolio_title, game_title, ticker, shares)
         # WHEN / THEN
         self.assertEqual(handle_transactions(request).status_code, 200)
+
+    def test_handle_transaction_success(self):
+        """
+        Test that we can get one transaction successfully
+        """
+        # GIVEN
+        request = self.factory.get('/transaction/')
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        ticker = "AAPL"
+        shares = 3
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        t = Transaction.objects.get(ticker=ticker)
+        # WHEN / THEN
+        self.assertEqual(handle_transaction(request, t.uid).status_code, 200)
+
+    def test_handle_transaction_not_found(self):
+        """
+        Test that a transaction not found raises an exception
+        """
+        # GIVEN
+        request = self.factory.get('/transaction/')
+        game_title = "Game Title"
+        portfolio_title = "Portfolio Title"
+        _create_game_helper(game_title, "test rules", 10000)
+        _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
+        ticker = "AAPL"
+        shares = 3
+        _trade_stock_helper(portfolio_title, game_title, ticker, shares)
+        # WHEN / THEN
+        self.assertEqual(handle_transaction(request, "c971b071-7d59-4d96-be9b-710a463xxxxx").status_code, 500)

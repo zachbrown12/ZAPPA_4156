@@ -159,6 +159,8 @@ class Portfolio(models.Model):
             print(error)
             raise Exception(error)
         if flip * option.strike_price() >= flip * price:
+            # This one does not throw an error, just warns user it might be a bad idea.
+            # TODO: find a better way to notify than "print"
             warning = f"Warning: {option_type_text} option {contract} has a strike price of \
                         {option.strike_price()}. Current price of {ticker} is {price}."
             print(warning)
@@ -444,7 +446,12 @@ class Option(models.Model):
         if not self.expiration():
             return None
         expdate = str(self.expiration().date())
-        df = tick.option_chain(date=expdate)
+        try:
+            df = tick.option_chain(date=expdate)
+        except ValueError:
+            error = f"No contract exists for {str(self.ticker())} with expiration date {expdate}."
+            print(error)
+            return None
         if self.option_type() == 'C':
             options = df.calls.set_index('contractSymbol').T.to_dict()
         elif self.option_type() == 'P':

@@ -1,7 +1,7 @@
 .PHONY : test trade flake8 html_coverage
 # Run all tests and generate coverage
 test:
-	coverage run --source='.' manage.py test
+	coverage run manage.py test
 	coverage html
 
 # Run trade_simulation tests only

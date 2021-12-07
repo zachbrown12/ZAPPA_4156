@@ -980,6 +980,21 @@ class OptionTestCase(TestCase):
         # THEN
         self.assertIsNone(info)
 
+    def test_get_info_bad_expiration_date(self):
+        """
+        Test that get_info returns None if expiration date is not available in yfinance
+        """
+        # GIVEN
+        portfolio = Portfolio.objects.get(title="Test portfolio")
+        Option.objects.create(portfolio=portfolio,
+                              contract="AAPL201223C00148000",
+                              quantity=3)
+        opt = Option.objects.get(contract="AAPL201223C00148000")
+        # WHEN
+        info = opt.get_info()
+        # THEN
+        self.assertIsNone(info)
+
     @mock.patch("yfinance.Ticker.option_chain",
                 return_value=SimpleNamespace(calls=DataFrame(columns=["contractSymbol"]),
                                              puts=DataFrame(columns=["contractSymbol"]))

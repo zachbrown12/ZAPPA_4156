@@ -189,6 +189,7 @@ def _trade_stock_helper(title, game_title, ticker, shares, exercise=None):
     Helper function to buy or sell a stock
     Returns: N/A
     """
+    shares = float(shares)
     portfolio = find_portfolio(title, game_title)
     print("portfolio here")
     print(portfolio)
@@ -213,6 +214,7 @@ def _trade_option_helper(title, game_title, contract, quantity):
     Helper function to buy or sell an option
     Returns: N/A
     """
+    quantity = float(quantity)
     portfolio = find_portfolio(title, game_title)
     print("portfolio here")
     print(portfolio)
