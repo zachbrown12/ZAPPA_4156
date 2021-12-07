@@ -7,12 +7,16 @@ from django.contrib.auth.models import User
 from pandas import DataFrame
 from types import SimpleNamespace
 
+TEST_GAME_TITLE = "Test Game"
+TEST_RULES = "Test Rules"
+TEST_PORTFOLIO_TITLE = "Test Portfolio"
+
 
 class GameTestCase(TestCase):
     def setUp(self):
         # Create game
         Game.objects.create(
-            title="Test Game", starting_balance=5000, rules="test rules"
+            title=TEST_GAME_TITLE, starting_balance=5000, rules=TEST_RULES
         )
 
     def test_str(self):
@@ -22,7 +26,7 @@ class GameTestCase(TestCase):
         # GIVEN
         g = Game.objects.all()[0]
         # WHEN / THEN
-        assert g.__str__() == "Test Game"
+        assert g.__str__() == TEST_GAME_TITLE
 
     def test_rank_portfolios_tie(self):
         """
@@ -32,7 +36,7 @@ class GameTestCase(TestCase):
         game = Game.objects.all()[0]
         # Create portfolios for game
         for i in range(3):
-            Portfolio.objects.create(title=f"Test Portfolio {i}", game=game)
+            Portfolio.objects.create(title=f"{TEST_PORTFOLIO_TITLE} {i}", game=game)
         # WHEN
         leaderboard = game.rank_portfolios()
         # Test that leaderboard rankings are as expected
@@ -54,7 +58,7 @@ class GameTestCase(TestCase):
         for i in range(3):
             cash_balance = (i + 1) * 1000
             Portfolio.objects.create(
-                title=f"Test Portfolio {i}", game=game, cash_balance=cash_balance
+                title=f"{TEST_PORTFOLIO_TITLE} {i}", game=game, cash_balance=cash_balance
             )
 
         # WHEN
@@ -70,10 +74,10 @@ class GameTestCase(TestCase):
 class PortfolioTestCase(TestCase):
     def setUp(self):
         # Create game
-        Game.objects.create(title="Test Game", rules="test rules")
+        Game.objects.create(title=TEST_GAME_TITLE, rules=TEST_RULES)
         game = Game.objects.all()[0]
         # Create portfolio
-        Portfolio.objects.create(title="Test portfolio", game=game)
+        Portfolio.objects.create(title=TEST_PORTFOLIO_TITLE, game=game)
 
     def test_str(self):
         """
@@ -82,7 +86,7 @@ class PortfolioTestCase(TestCase):
         # GIVEN
         p = Portfolio.objects.all()[0]
         # WHEN / THEN
-        assert p.__str__() == "Test portfolio"
+        assert p.__str__() == TEST_PORTFOLIO_TITLE
 
     @mock.patch("trade_simulation.models.Holding.bid_price", return_value=200)
     def test_equity_value_success(self, mock_bid_price):
@@ -733,10 +737,10 @@ class PortfolioTestCase(TestCase):
 class HoldingTestCase(TestCase):
     def setUp(self):
         # Create game
-        Game.objects.create(title="Test Game", rules="test rules")
+        Game.objects.create(title=TEST_GAME_TITLE, rules="test rules")
         game = Game.objects.all()[0]
         # Create portfolio
-        Portfolio.objects.create(title="Test portfolio", game=game)
+        Portfolio.objects.create(title=TEST_PORTFOLIO_TITLE, game=game)
         # Create holding
         portfolio = Portfolio.objects.all()[0]
         Holding.objects.create(portfolio=portfolio, ticker="AAPL", shares=3)
@@ -857,10 +861,10 @@ class HoldingTestCase(TestCase):
 class OptionTestCase(TestCase):
     def setUp(self):
         # Create game
-        Game.objects.create(title="Test Game", rules="test rules")
+        Game.objects.create(title=TEST_GAME_TITLE, rules="test rules")
         game = Game.objects.all()[0]
         # Create portfolio
-        Portfolio.objects.create(title="Test portfolio", game=game)
+        Portfolio.objects.create(title=TEST_PORTFOLIO_TITLE, game=game)
         # Create option
         portfolio = Portfolio.objects.all()[0]
         Option.objects.create(portfolio=portfolio,
@@ -912,7 +916,7 @@ class OptionTestCase(TestCase):
         Test that a faulty string returns None for expiration date
         """
         # GIVEN
-        portfolio = Portfolio.objects.get(title="Test portfolio")
+        portfolio = Portfolio.objects.get(title=TEST_PORTFOLIO_TITLE)
         Option.objects.create(portfolio=portfolio,
                               contract="AAPL2X122BC00148000",
                               quantity=3)
@@ -955,7 +959,7 @@ class OptionTestCase(TestCase):
         Test that get_info returns None if expiration date is missing
         """
         # GIVEN
-        portfolio = Portfolio.objects.get(title="Test portfolio")
+        portfolio = Portfolio.objects.get(title=TEST_PORTFOLIO_TITLE)
         Option.objects.create(portfolio=portfolio,
                               contract="AAPL2X122BC00148000",
                               quantity=3)
@@ -970,7 +974,7 @@ class OptionTestCase(TestCase):
         Test that get_info returns None if option type is not 'C' or 'P'
         """
         # GIVEN
-        portfolio = Portfolio.objects.get(title="Test portfolio")
+        portfolio = Portfolio.objects.get(title=TEST_PORTFOLIO_TITLE)
         Option.objects.create(portfolio=portfolio,
                               contract="AAPL211223Q00148000",
                               quantity=3)
@@ -985,7 +989,7 @@ class OptionTestCase(TestCase):
         Test that get_info returns None if expiration date is not available in yfinance
         """
         # GIVEN
-        portfolio = Portfolio.objects.get(title="Test portfolio")
+        portfolio = Portfolio.objects.get(title=TEST_PORTFOLIO_TITLE)
         Option.objects.create(portfolio=portfolio,
                               contract="AAPL201223C00148000",
                               quantity=3)

@@ -17,7 +17,7 @@ from api.helpers import (
     _get_option_helper,
 )
 from api.views import (
-    getRoutes,
+    get_routes,
     handle_games,
     handle_game,
     handle_portfolios,
@@ -32,6 +32,17 @@ from api.views import (
 )
 from .utils import find_game_by_title, find_portfolio, find_holding, find_option
 
+TEST_GAME_TITLE = "Game Title"
+TEST_RULES = "Test Rules"
+TEST_PORTFOLIO_TITLE = "Portfolio Title"
+
+GAME_URL = "/game/"
+PORTFOLIO_URL = "/portfolio/"
+TRADE_URL = "/portfolio/trade"
+HOLDING_URL = "/holding/"
+OPTION_URL = "/option/"
+TRANSACTION_URL = "/transaction/"
+
 
 class HelperTestCase(TestCase):
 
@@ -45,9 +56,9 @@ class HelperTestCase(TestCase):
         Test that we can successfully create a game
         """
         # GIVEN
-        title = "Test Game"
+        title = TEST_GAME_TITLE
         # WHEN
-        _create_game_helper(title, "test rules", 10000)
+        _create_game_helper(title, TEST_RULES, 10000)
         games = Game.objects.all()
         # THEN
         assert len(games) == 1
@@ -59,9 +70,9 @@ class HelperTestCase(TestCase):
         Test that creating a game fails when we create a game with same title as existing game
         """
         # GIVEN
-        title = "Test Game"
+        title = TEST_GAME_TITLE
         # WHEN
-        _create_game_helper(title, "test rules", 10000)
+        _create_game_helper(title, TEST_RULES, 10000)
         games = Game.objects.all()
         # THEN
         assert len(games) == 1
@@ -69,17 +80,17 @@ class HelperTestCase(TestCase):
         assert game.title == title
         # WHEN / THEN
         with self.assertRaises(Exception):
-            _create_game_helper(title, "test rules", 1000)
+            _create_game_helper(title, TEST_RULES, 1000)
 
     @mock.patch(
         "trade_simulation.models.Game.objects.create", return_value=RuntimeError
     )
     def _test_create_game_helper_runtime_error(self, mock_create):
         # GIVEN
-        title = "Test Game"
+        title = TEST_GAME_TITLE
         # WHEN / THEN
         with self.assertRaises(Exception):
-            _create_game_helper(title, "test rules", 10000)
+            _create_game_helper(title, TEST_RULES, 10000)
 
     def test_get_game_standings_helper(self):
         """
@@ -87,8 +98,8 @@ class HelperTestCase(TestCase):
         """
         # GIVEN
         for i in range(3):
-            title = f"Test Game {i}"
-            _create_game_helper(title, "test rules", 10000)
+            title = f"{TEST_GAME_TITLE} {i}"
+            _create_game_helper(title, TEST_RULES, 10000)
         # WHEN
         actual = _get_game_standings_helper()
         # THEN
@@ -110,8 +121,8 @@ class HelperTestCase(TestCase):
         Test that we can delete an existing game successfully
         """
         # GIVEN
-        title = "Test Game"
-        _create_game_helper(title, "test rules", 10000)
+        title = TEST_GAME_TITLE
+        _create_game_helper(title, TEST_RULES, 10000)
 
         # WHEN
         _delete_game_helper(title)
@@ -126,7 +137,7 @@ class HelperTestCase(TestCase):
         Test that exception is thrown if try to delete a game that does not exist
         """
         # GIVEN
-        title = "Game Title"
+        title = TEST_GAME_TITLE
         # WHEN / THEN
         with self.assertRaises(Exception):
             _delete_game_helper(title)
@@ -135,8 +146,8 @@ class HelperTestCase(TestCase):
         """
         Test that we can get a game successfully
         """
-        title = "Game title"
-        _create_game_helper(title, "test rules", 10000)
+        title = TEST_GAME_TITLE
+        _create_game_helper(title, TEST_RULES, 10000)
         # WHEN
         game = _get_game_helper(title)
         # THEN
@@ -147,7 +158,7 @@ class HelperTestCase(TestCase):
         Test that we throw an exception if game does not exist
         """
         # GIVEN
-        title = "Game title"
+        title = TEST_GAME_TITLE
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_game_helper(title)
@@ -157,25 +168,25 @@ class HelperTestCase(TestCase):
         Test that we can fetch portfolio by title and game successfully
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
 
         # WHEN
         portfolio = _get_portfolio_helper(portfolio_title, game_title)
 
         # THEN
-        portfolio["title"] == portfolio_title
+        assert portfolio["title"] == portfolio_title
 
     def test_get_portfolio_helper_not_found(self):
         """
         Test that exception raised if portfolio not found
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
 
         # WHEN / THEN
         with self.assertRaises(Exception):
@@ -186,10 +197,10 @@ class HelperTestCase(TestCase):
         Test that we can fetch all portfolios successfully
         """
         # GIVEN
-        game_title = "Test Game"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         for i in range(3):
-            portfolio_title = f"Portfolio Title {i}"
+            portfolio_title = f"{TEST_PORTFOLIO_TITLE} {i}"
             _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN
         portfolios = _get_portfolios_helper()
@@ -204,8 +215,8 @@ class HelperTestCase(TestCase):
         Test that when runtime error occurs when getting portfolios, exception is thrown
         """
         # GIVEN
-        game_title = "Test Game"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_portfolios_helper()
@@ -215,9 +226,9 @@ class HelperTestCase(TestCase):
         Test that we can delete an existing portfolio successfully
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN
         _delete_portfolio_helper(portfolio_title, game_title)
@@ -230,9 +241,9 @@ class HelperTestCase(TestCase):
         Test that deleting a portfolio that does not exist throws an exception
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _delete_portfolio_helper(portfolio_title, game_title)
@@ -242,8 +253,8 @@ class HelperTestCase(TestCase):
         Test that creating a portfolio in a game that does not exist throws an exception
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
         # WHEN / THEN
         with self.assertRaises(Exception):
             _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
@@ -253,9 +264,9 @@ class HelperTestCase(TestCase):
         Test that creating a portfolio in a game that already has a portfolio of that name throws an exception
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         with self.assertRaises(Exception):
@@ -266,9 +277,9 @@ class HelperTestCase(TestCase):
         Test that creating a portfolio in a game without specifying a username throws an exception
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _post_portfolio_helper(portfolio_title, game_title, None)
@@ -278,9 +289,9 @@ class HelperTestCase(TestCase):
         Test that creating a portfolio in a game with a bad username throws an exception
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _post_portfolio_helper(portfolio_title, game_title, "ldsakfkwdsj")
@@ -291,9 +302,9 @@ class HelperTestCase(TestCase):
         Test that we buy a stock successfully if shares > 0
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -310,9 +321,9 @@ class HelperTestCase(TestCase):
         Test that we buy a stock while exercising option successfully if shares > 0
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -331,9 +342,9 @@ class HelperTestCase(TestCase):
         Test that we sell a stock successfully if shares < 0
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -351,9 +362,9 @@ class HelperTestCase(TestCase):
         Test that we sell a stock while exercising option successfully if shares < 0
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 30000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 30000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "TSLA"
         shares = 2
@@ -372,9 +383,9 @@ class HelperTestCase(TestCase):
         Test that we cannot buy or sell a stock if portfolio does not exist
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _trade_stock_helper(portfolio_title, game_title, "AAPL", 3)
@@ -385,9 +396,9 @@ class HelperTestCase(TestCase):
         Test that we buy an option successfully if quantity > 0
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 1.0
@@ -403,9 +414,9 @@ class HelperTestCase(TestCase):
         Test that we sell an option successfully if quantity < 0
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 1.0
@@ -421,9 +432,9 @@ class HelperTestCase(TestCase):
         Test that we cannot buy or sell an option if portfolio does not exist
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _trade_option_helper(portfolio_title, game_title, "AAPL211223C00148000", 1.0)
@@ -433,9 +444,9 @@ class HelperTestCase(TestCase):
         Test that we can successfully get a holding for a portfolio
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -450,9 +461,9 @@ class HelperTestCase(TestCase):
         Test that throws an error if portfolio does not exist
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_holding_helper(portfolio_title, game_title, "AAPL")
@@ -462,9 +473,9 @@ class HelperTestCase(TestCase):
         Test that we can successfully get an option in a portfolio
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 1.0
@@ -479,9 +490,9 @@ class HelperTestCase(TestCase):
         Test that throws an error if portfolio does not exist
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_option_helper(portfolio_title, game_title, "AAPL211223C00148000")
@@ -502,7 +513,7 @@ class ViewTestCase(TestCase):
         # GIVEN
         request = self.factory.get('')
         # WHEN/THEN
-        self.assertEqual(getRoutes(request).status_code, 200)
+        self.assertEqual(get_routes(request).status_code, 200)
 
     def test_handle_games_success(self):
         """
@@ -510,8 +521,8 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         request = self.factory.get('/games/')
-        game_title = "Game Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         self.assertEqual(handle_games(request).status_code, 200)
 
@@ -520,20 +531,20 @@ class ViewTestCase(TestCase):
         Test that we can get a game successfully
         """
         # GIVEN
-        request = self.factory.get('/game/')
-        game_title = "Game Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(GAME_URL)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
-        self.assertEqual(handle_game(request, "Game Title").status_code, 200)
+        self.assertEqual(handle_game(request, game_title).status_code, 200)
 
     def test_handle_game_get_fail(self):
         """
         Tests failure on getting a game when it does not exist.
         """
         # GIVEN
-        request = self.factory.get('/game/')
-        game_title = "Game Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(GAME_URL)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
 
@@ -542,8 +553,8 @@ class ViewTestCase(TestCase):
         Tests that we can create a game successfully
         """
         # GIVEN
-        request = self.factory.post('/game/')
-        game_title = "Game Title"
+        request = self.factory.post(GAME_URL)
+        game_title = TEST_GAME_TITLE
         # WHEN / THEN
         self.assertEqual(handle_game(request, game_title).status_code, 200)
 
@@ -553,9 +564,9 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         data = {'rules': 'kill or be killed', 'startingBalance': 15000}
-        request = self.factory.post('/game/', data)
-        game_title = "Game Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(GAME_URL, data)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         self.assertEqual(handle_game(request, game_title).status_code, 500)
 
@@ -564,9 +575,9 @@ class ViewTestCase(TestCase):
         Tests we can delete a game successfully
         """
         # GIVEN
-        request = self.factory.delete('/game/')
-        game_title = "Game Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.delete(GAME_URL)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         self.assertEqual(handle_game(request, game_title).status_code, 200)
 
@@ -575,9 +586,9 @@ class ViewTestCase(TestCase):
         Tests failure on deleting games
         """
         # GIVEN
-        request = self.factory.delete('/game/')
-        game_title = "Game Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.delete(GAME_URL)
+        game_title = TEST_GAME_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
 
@@ -587,9 +598,9 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         request = self.factory.get('/portfolios/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolios(request).status_code, 200)
@@ -599,23 +610,23 @@ class ViewTestCase(TestCase):
         Test that we can get a portfolio successfully
         """
         # GIVEN
-        request = self.factory.get('/portfolio/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(PORTFOLIO_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
-        self.assertEqual(handle_portfolio(request, "Game Title", "Portfolio Title").status_code, 200)
+        self.assertEqual(handle_portfolio(request, TEST_GAME_TITLE, TEST_PORTFOLIO_TITLE).status_code, 200)
 
     def test_handle_portfolio_get_fail(self):
         """
         Tests failure on getting a portfolio when it does not exist.
         """
         # GIVEN
-        request = self.factory.get('/portfolio/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(PORTFOLIO_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
@@ -626,10 +637,10 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         data = {"username": self.test_user.username}
-        request = self.factory.post('/portfolio/', data)
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(PORTFOLIO_URL, data)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 200)
 
@@ -639,10 +650,10 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         data = {"username": self.test_user.username}
-        request = self.factory.post('/portfolio/', data)
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(PORTFOLIO_URL, data)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 500)
@@ -652,10 +663,10 @@ class ViewTestCase(TestCase):
         Tests failure on creating portfolio if username is missing from the request
         """
         # GIVEN
-        request = self.factory.post('/portfolio/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(PORTFOLIO_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 500)
 
@@ -664,10 +675,10 @@ class ViewTestCase(TestCase):
         Tests we can delete a portfolio successfully
         """
         # GIVEN
-        request = self.factory.delete('/portfolio/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.delete(PORTFOLIO_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 200)
@@ -677,10 +688,10 @@ class ViewTestCase(TestCase):
         Tests failure on deleting portfolios
         """
         # GIVEN
-        request = self.factory.delete('/portfolio/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.delete(PORTFOLIO_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
@@ -691,16 +702,16 @@ class ViewTestCase(TestCase):
         Tests we can buy a stock successfully
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
         data = {"portfolioTitle": portfolio_title,
                 "gameTitle": game_title,
                 "securityType": "stock",
                 "ticker": "AAPL",
                 "shares": 4.0,
                 }
-        request = self.factory.post('/portfolio/trade', data)
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(TRADE_URL, data)
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 200)
@@ -711,16 +722,16 @@ class ViewTestCase(TestCase):
         Tests that a buying a stock with invalid ticker raises an error
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
         data = {"portfolioTitle": portfolio_title,
                 "gameTitle": game_title,
                 "securityType": "stock",
                 "ticker": "AAPX",
                 "shares": 4.0,
                 }
-        request = self.factory.post('/portfolio/trade', data)
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(TRADE_URL, data)
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 500)
@@ -731,16 +742,16 @@ class ViewTestCase(TestCase):
         Tests we can buy a call option successfully
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
         data = {"portfolioTitle": portfolio_title,
                 "gameTitle": game_title,
                 "securityType": "option",
                 "contract": "AAPL211223C00148000",
                 "quantity": 1.0
                 }
-        request = self.factory.post('/portfolio/trade', data)
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(TRADE_URL, data)
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 200)
@@ -751,16 +762,16 @@ class ViewTestCase(TestCase):
         Tests that buying an option with a bad contract name raises an error
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
         data = {"portfolioTitle": portfolio_title,
                 "gameTitle": game_title,
                 "securityType": "option",
                 "contract": "AAPL211223X00148000",
                 "quantity": 1.0
                 }
-        request = self.factory.post('/portfolio/trade', data)
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(TRADE_URL, data)
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 500)
@@ -771,8 +782,8 @@ class ViewTestCase(TestCase):
         Tests we can buy a stock while exercising a call option successfully
         """
         # GIVEN
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
         contract = "AAPL211223C00148000"
         data = {"portfolioTitle": portfolio_title,
                 "gameTitle": game_title,
@@ -781,8 +792,8 @@ class ViewTestCase(TestCase):
                 "shares": 4.0,
                 "exercise": contract,
                 }
-        request = self.factory.post('/portfolio/trade', data)
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(TRADE_URL, data)
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         _trade_option_helper(portfolio_title, game_title, contract, 1.0)
         # WHEN / THEN
@@ -794,10 +805,10 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         data = {'securityType': 'Blah'}
-        request = self.factory.post('/portfolio/trade', data)
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.post(TRADE_URL, data)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 500)
@@ -808,9 +819,9 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         request = self.factory.get('/holdings/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -823,10 +834,10 @@ class ViewTestCase(TestCase):
         Test that we can get a holding successfully
         """
         # GIVEN
-        request = self.factory.get('/holding/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(HOLDING_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -839,10 +850,10 @@ class ViewTestCase(TestCase):
         Test that a holding not found raises an exception
         """
         # GIVEN
-        request = self.factory.get('/holding/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(HOLDING_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         # WHEN / THEN
@@ -854,9 +865,9 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         request = self.factory.get('/options/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 4.0
@@ -869,10 +880,10 @@ class ViewTestCase(TestCase):
         Test that we can get an option successfully
         """
         # GIVEN
-        request = self.factory.get('/option/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(OPTION_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 4.0
@@ -885,10 +896,10 @@ class ViewTestCase(TestCase):
         Test that an option not found raises an exception
         """
         # GIVEN
-        request = self.factory.get('/option/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(OPTION_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         # WHEN / THEN
@@ -900,9 +911,9 @@ class ViewTestCase(TestCase):
         """
         # GIVEN
         request = self.factory.get('/transactions/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -915,10 +926,10 @@ class ViewTestCase(TestCase):
         Test that we can get one transaction successfully
         """
         # GIVEN
-        request = self.factory.get('/transaction/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(TRANSACTION_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -932,10 +943,10 @@ class ViewTestCase(TestCase):
         Test that a transaction not found raises an exception
         """
         # GIVEN
-        request = self.factory.get('/transaction/')
-        game_title = "Game Title"
-        portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        request = self.factory.get(TRANSACTION_URL)
+        game_title = TEST_GAME_TITLE
+        portfolio_title = TEST_PORTFOLIO_TITLE
+        _create_game_helper(game_title, TEST_RULES, 10000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
