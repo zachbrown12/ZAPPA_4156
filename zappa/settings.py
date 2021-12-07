@@ -26,21 +26,22 @@ SECRET_KEY = "django-insecure-)g6+#)_2lg8kl^1%j)z(v0*($u!7*3e^g$+xn-quc7(84-7nl8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'trade_simulation.apps.TradeSimulationConfig',
-    'rest_framework',
-    'users.apps.UsersConfig',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "trade_simulation.apps.TradeSimulationConfig",
+    "rest_framework",
+    "users.apps.UsersConfig",
+    "frontend",
 ]
 
 MIDDLEWARE = [
@@ -51,7 +52,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
@@ -87,7 +87,8 @@ DATABASES = {
         "USER": "zappa",
         "PASSWORD": "incaroads",
         "HOST": "database-1.c8j9g5p5qd7q.us-east-2.rds.amazonaws.com",
-        "PORT": 5432}
+        "PORT": 5432,
+    }
 }
 
 
@@ -128,5 +129,5 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-if os.getcwd() == '/app':
+if os.getcwd() == "/app":
     DEBUG = False

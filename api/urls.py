@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+
 
 urlpatterns = [
     path("", views.getRoutes),
@@ -9,9 +10,14 @@ urlpatterns = [
     path("portfolio/<str:game_title>/<str:port_title>/", views.handle_portfolio),
     path("portfolio/trade", views.trade),
     path("holdings/", views.handle_holdings),
-    path("holding/<str:port_title>/<str:game_title>/<str:ticker>", views.handle_holding),
+    path(
+        "holding/<str:port_title>/<str:game_title>/<str:ticker>", views.handle_holding
+    ),
     path("options/", views.handle_options),
-    path("option/<str:port_title>/<str:game_title>/<str:contract>", views.handle_option),
+    path(
+        "option/<str:port_title>/<str:game_title>/<str:contract>", views.handle_option
+    ),
     path("transactions/", views.handle_transactions),
-    path("transaction/<str:pk>", views.handle_transaction)
+    path("transaction/<str:pk>", views.handle_transaction),
+    path("", include("frontend.urls")),
 ]
