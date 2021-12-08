@@ -30,6 +30,7 @@ jobs:
       - run:
           name: Migrate DB
           command: |
+           . venv/bin/activate
            python manage.py migrate
            python manage.py makemigrations
       - run:
