@@ -1,5 +1,8 @@
 .PHONY : test trade flake8 html_coverage
 # Run all tests and generate coverage
+build:
+	python .\manage.py runserver
+
 test:
 	coverage run manage.py test
 	coverage html
