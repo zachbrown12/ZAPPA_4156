@@ -87,8 +87,13 @@ DATABASES = {
         "USER": "zappa",
         "PASSWORD": "incaroads",
         "HOST": "database-1.c8j9g5p5qd7q.us-east-2.rds.amazonaws.com",
-        "PORT": 5432}
-}
+        "PORT": 5432,
+        "TEST": {
+            "NAME": "test_zappa",
+        }
+        }
+        }
+
 
 
 # Password validation
