@@ -1,25 +1,34 @@
-version: 2.1
-orbs:
-  python: circleci/python@1.0.0
+version: 2
 jobs:
-  build:
+  build-job:
     docker:
-      - image: cimg/python:3.6.10
-        environment:
-          DATABASE_URL: database-1.c8j9g5p5qd7q.us-east-2.rds.amazonaws.com
-      - image: circleci/postgres:9.6.2
-        environment:
-          POSTGRES_USER: zappa
-          POSTGRES_DB: incaroads
+      - image: circleci/python:3.7.3
+      - image: circleci/postgres:10.5
+    environment:
+      DATABASE_URL: postgres://postgres:@localhost/circle_test
+      DJANGO_SECRET_KEY: test
+      DJANGO_READ_DOT_ENV_FILE: True
+      DJANGO_SETTINGS_MODULE: zappa.settings
+    working_directory: ~/app
     steps:
       - checkout
-      - python/install-packages
+      - restore_cache:
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:
-          name: Run django tests
+          name: Install Python dependencies
           command: |
-            pipenv run python manage.py test
-      - store_test_results:
-          path: test-results
-      - store_artifacts:
-          path: test-results
-          destination: tr1
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements/local.txt
+      - save_cache:
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - 'venv'
+      - run:
+          name: Add python project to path
+          command: 'echo "$(realpath .)/app" > venv/lib/python3.7/site-packages/app.pth'
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            python manage.py test
