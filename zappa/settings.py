@@ -91,9 +91,8 @@ DATABASES = {
         "TEST": {
             "NAME": "test_zappa",
         }
-        }
-        }
-
+    }
+}
 
 
 # Password validation
