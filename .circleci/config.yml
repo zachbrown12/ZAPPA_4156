@@ -1,4 +1,6 @@
-version: 2
+version: 2.1
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.0
 jobs:
   build-job:
     docker:
@@ -38,11 +40,12 @@ jobs:
           command: |
             . venv/bin/activate
             pipenv run python manage.py test
-      - run:
-          name: Run Flake8
-          command: |
-            . venv/bin/activate
-            python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv --output-file test-reports
+      #- run:
+      #    name: Run Flake8
+      #    command: |
+      #      . venv/bin/activate
+      #      python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv --output-file test-reports
+      - sonarcloud/scan
       - store_test_results:
           path: test-reports
       - store_artifacts:
