@@ -132,5 +132,7 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+TEST_OUTPUT_DIR = 'test-reports'
+
 if os.getcwd() == '/app':
     DEBUG = False
