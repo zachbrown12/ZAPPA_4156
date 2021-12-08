@@ -47,9 +47,7 @@ TRANSACTION_URL = "/transaction/"
 class HelperTestCase(TestCase):
 
     def setUp(self):
-        self.test_user = User.objects.create_user(username='test_user',
-                                                  email='test@user.com',
-                                                  password='12345')
+        self.test_user = User.objects.create_user(username='test_user')
 
     def _test_create_game_helper_success(self):
         """
