@@ -2,7 +2,7 @@ version: 2
 jobs:
   build-job:
     docker:
-      - image: circleci/python:3.7.3
+      - image: circleci/python:3.9.7
       - image: circleci/postgres:10.5
     environment:
       DATABASE_URL: postgres://postgres:@localhost/circle_test
@@ -27,6 +27,11 @@ jobs:
       - run:
           name: Add python project to path
           command: 'echo "$(realpath .)/app" > venv/lib/python3.7/site-packages/app.pth'
+      - run:
+          name: Migrate DB
+          command: |
+           python manage.py migrate
+           python manage.py makemigrations
       - run:
           name: Run tests
           command: |
