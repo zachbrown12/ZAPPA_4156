@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'trade_simulation.apps.TradeSimulationConfig',
     'rest_framework',
     'users.apps.UsersConfig',
+    'django_nose',
 ]
 
 MIDDLEWARE = [
@@ -133,6 +134,7 @@ STATIC_URL = "/static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 TEST_OUTPUT_DIR = 'test-reports'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 if os.getcwd() == '/app':
     DEBUG = False
