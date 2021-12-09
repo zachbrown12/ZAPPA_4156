@@ -53,7 +53,9 @@ def handle_games(request):
     """
     Function that handles getting all created games
     """
-    return Response(_get_game_standings_helper())
+    games = _get_game_standings_helper()
+    resp = Response(games)
+    return resp
 
 
 @api_view(["GET", "POST", "DELETE"])
@@ -61,6 +63,7 @@ def handle_game(request, game_title):
     """
     Function that handles getting, creating, or deleting one game.
     """
+    print("in here")
     # On a GET request show the requested game or throw an error
     if request.method == GET_METHOD:
         try:
@@ -70,6 +73,7 @@ def handle_game(request, game_title):
             return Response(status=500, data=str(e))
     # On a POST request create the game or throw an error
     elif request.method == POST_METHOD:
+        print("recognized post")
         rules = request.data.get("rules")
         starting_balance = request.data.get("startingBalance")
         try:
@@ -144,7 +148,9 @@ def trade(request):
         if "exercise" in request.data:
             exercise = request.data.get("exercise")
         try:
-            _trade_stock_helper(portfolio_title, game_title, ticker, shares, exercise=exercise)
+            _trade_stock_helper(
+                portfolio_title, game_title, ticker, shares, exercise=exercise
+            )
         except Exception as e:
             return Response(status=500, data=str(e))
 

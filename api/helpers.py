@@ -1,6 +1,17 @@
-from .serializers import GameSerializer, PortfolioSerializer, HoldingSerializer, OptionSerializer
+from .serializers import (
+    GameSerializer,
+    PortfolioSerializer,
+    HoldingSerializer,
+    OptionSerializer,
+)
 from trade_simulation.models import Game, Portfolio, Holding, Option
-from .utils import find_game_by_title, find_portfolio, find_holding, find_option, find_user_by_username
+from .utils import (
+    find_game_by_title,
+    find_portfolio,
+    find_holding,
+    find_option,
+    find_user_by_username,
+)
 
 
 def _get_game_standings_helper():
@@ -45,13 +56,17 @@ def _create_game_helper(title, rules, starting_balance):
     Returns: N/A or error
     """
     # title is a unique field
+    print("game helper")
     if Game.objects.filter(title=title).exists():
+        print("game exists")
         error = f"Game with title {title} already exists."
         print(error)
         raise Exception(error)
 
     try:
+        print("here")
         game = Game.objects.create()
+        print("here")
         game.title = title
         game.rules = rules
         if starting_balance:

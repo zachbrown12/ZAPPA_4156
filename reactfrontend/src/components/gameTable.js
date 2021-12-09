@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DataGrid }from '@mui/x-data-grid';
 
-export default function GameTable() {
+export default function GameTable(data) {
     const columns = [
         { field: 'title', headerName: 'Title', width: 150},
         {
@@ -14,21 +14,24 @@ export default function GameTable() {
         { field: 'rules', headerName: 'Rules', width: 300},
     ];
 
-    const rows = [
-        {
-            'id': "id1", // TODO: this will have to be uid
-            'title': 'Test Game',
-            'starting_balance': 1234.23,
-            'winner': null,
-            'created_on': '12-06-2021',
-            'rules': 'All is fair in love and war',
+    const processGameData = (data) => {
+        let resp = []
+        for (let d of data) {
+            let r = {}
+            r["id"] = d.uid
+            r["title"] = d.title
+            r["starting_balance"] = d.starting_balance
+            r["rules"] = d.rules
+            r["portfolios"] = d.portfolios
+            resp.push(r)
         }
-    ]
+        return resp
+    }
 
     return (
         <DataGrid
             columns={columns}
-            rows={rows}
+            rows={processGameData(data.data)}
         >
         </DataGrid>
     )

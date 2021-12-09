@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "trade_simulation.apps.TradeSimulationConfig",
     "rest_framework",
     "users.apps.UsersConfig",
-    "frontend",
+    "reactfrontend",
 ]
 
 MIDDLEWARE = [

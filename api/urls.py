@@ -19,5 +19,4 @@ urlpatterns = [
     ),
     path("transactions/", views.handle_transactions),
     path("transaction/<str:pk>", views.handle_transaction),
-    path("", include("frontend.urls")),
 ]

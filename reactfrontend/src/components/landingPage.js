@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import axios from "axios";
 import GameTable from './gameTable';
@@ -11,21 +11,25 @@ export default function LandingPage() {
   // eslint-disable-next-line
   const [newGameDialogVisible, setNewGameDialogVisible] = useState(false);
   // eslint-disable-next-line
-  const [gameName, setGameName] = useState("Dummy Game Name");
+  const [gameName, setGameName] = useState("DummyGameName");
   // eslint-disable-next-line
   const [gameRules, setGameRules] = useState(null);
   // eslint-disable-next-line
   const [gameStartingBalance, setGameStartingBalance] = useState(null);
   // eslint-disable-next-line
-  const [gamesData, setGamesData] = useState([]);
+  let [gamesData, setGamesData] = useState([]);
   const setVisible = () => {
       setNewGameDialogVisible(true);
   }
 
   // eslint-disable-next-line
-  const createNewGame = () => {
+  const createNewGame = async () => {
+    let data = {
+        rules: "Test",
+        startingBalance: "All's fair in love and war"
+    }
     axios
-        .post(`/api/game/${gameName}`)
+        .post(`/api/game/${gameName}`, data)
         .then((res) => console.log(res.data))
         .catch((err) => console.log(err)); // TODO: Add better error
   }
@@ -37,16 +41,25 @@ export default function LandingPage() {
   }
 
   // eslint-disable-next-line
-  const fetchGameData = () => {
-      axios
-        .get('/api/games')
-        .then((res) => setGamesData(res.data))
-        .catch((err) => console.log(err));
+  const fetchGameData = async () => {
+    axios
+    .get('/api/games')
+    .then((resp) => {
+        console.log(resp.data)
+        setGamesData(resp.data);
+    }).catch((err) => console.log(err));
   }
+
+  useEffect(() => {
+      (async () => {
+        await createNewGame();
+        await fetchGameData();
+      })();
+  }, []);
   return (
     <div>
       <Button variant="contained" onClick={setVisible}>Create New Game</Button>
-      <GameTable></GameTable>
+      <GameTable data={gamesData}></GameTable>
       {newGameDialogVisible ? <NewGameDialog open={newGameDialogVisible} onCloseDialog={handleDialogClose}></NewGameDialog>: <></>}
     </div>
 
