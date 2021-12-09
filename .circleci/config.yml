@@ -65,6 +65,4 @@ workflows:
   build-deploy:
     jobs:
       - build-job
-  example-workflow:
-    jobs:
       - newman-collection-run

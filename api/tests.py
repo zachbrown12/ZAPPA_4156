@@ -683,7 +683,7 @@ class HelperTestCase(TestCase):
         request.path = '/api/options/'
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        _create_game_helper(game_title, "test rules", 30000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 4.0
@@ -701,7 +701,7 @@ class HelperTestCase(TestCase):
         request.path = '/api/holdings/'
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        _create_game_helper(game_title, "test rules", 30000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 4.0
@@ -719,7 +719,7 @@ class HelperTestCase(TestCase):
         request.path = '/api/holdings/'
         game_title = "Game Title"
         portfolio_title = "Portfolio Title"
-        _create_game_helper(game_title, "test rules", 10000)
+        _create_game_helper(game_title, "test rules", 30000)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         # WHEN / THEN
