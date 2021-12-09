@@ -141,24 +141,26 @@ class Portfolio(models.Model):
         except Option.DoesNotExist:
             error = f"Option {contract} is not in portfolio."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         if option.ticker() != ticker:
             error = f"Option {contract} is not for stock {ticker}."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         if option.expiration() <= datetime.now():
             error = f"Option {contract} has expired."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         if option.option_type() != option_type:
             error = f"Option {contract} is not a {option_type_text} option."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         if float(option.quantity) * REGULAR_SHARES < shares:
             error = f"Not enough shares available in option {contract}."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         if flip * option.strike_price() >= flip * price:
+            # This one does not throw an error, just warns user it might be a bad idea.
+            # TODO: find a better way to notify than "print"
             warning = f"Warning: {option_type_text} option {contract} has a strike price of \
                         {option.strike_price()}. Current price of {ticker} is {price}."
             print(warning)
@@ -176,7 +178,7 @@ class Portfolio(models.Model):
                 holding.delete()
             error = f"Ticker {ticker} is not currently traded."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
 
         # If a call option is being exercised, make sure it is valid and compute cost accordingly
         if exercise:
@@ -189,7 +191,7 @@ class Portfolio(models.Model):
             if created:
                 holding.delete()
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         holding.shares = float(0 if holding.shares is None else holding.shares) + float(
             shares
         )
@@ -214,12 +216,12 @@ class Portfolio(models.Model):
         except Holding.DoesNotExist:
             error = f"Holding {ticker} is not in portfolio."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         price = holding.bid_price()
         if price is None:
             error = f"Ticker {ticker} is not currently traded."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
 
         # If a put option is being exercised, make sure it is valid and compute cost accordingly
         if exercise:
@@ -231,7 +233,7 @@ class Portfolio(models.Model):
         if current_shares < float(shares):
             error = f"Not enough shares of {ticker} to sell {shares} shares."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         holding.shares = current_shares - float(shares)
         if holding.shares == 0.0:
             holding.delete()
@@ -259,14 +261,14 @@ class Portfolio(models.Model):
                 option.delete()
             error = f"Contract {contract} is not currently available."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         cost = price * float(quantity)
         if float(self.cash_balance) < cost:
             error = f"Not enough cash to buy ${cost} in {quantity} options of {contract}."
             if created:
                 option.delete()
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         option.quantity = float(0 if option.quantity is None else option.quantity) + float(
             quantity
         )
@@ -290,17 +292,17 @@ class Portfolio(models.Model):
         except Option.DoesNotExist:
             error = f"Contract {contract} is not in portfolio."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         price = option.bid_price()
         if price is None:
             error = f"Contract {contract} is not currently available."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         current_quantity = float(0 if option.quantity is None else option.quantity)
         if current_quantity < float(quantity):
             error = f"Not enough of {contract} in portfolio to sell {quantity} options."
             print(error)
-            raise Exception(error)
+            raise ValueError(error)
         option.quantity = current_quantity - float(quantity)
         if option.quantity == 0.0:
             option.delete()
@@ -407,17 +409,24 @@ class Option(models.Model):
         """
         return self.contract
 
+    @property
+    def split(self):
+        """
+        Split option contract symbol into its component parts
+        """
+        return re.split(r'(\d+)', self.contract)
+
     def ticker(self):
         """
         Return the stock ticker that this option is for
         """
-        return re.split(r'(\d+)', self.contract)[0]
+        return self.split[0]
 
     def expiration(self):
         """
         Return the expiration date of this option in datetime format
         """
-        exp = re.split(r'(\d+)', self.contract)[1]
+        exp = self.split[1]
         try:
             return datetime(2000 + int(exp[0:2]), int(exp[2:4]), int(exp[4:6]), 0, 0)
         except ValueError:
@@ -427,13 +436,13 @@ class Option(models.Model):
         """
         Return the type of option: 'C' for call, 'P' for put
         """
-        return re.split(r'(\d+)', self.contract)[2]
+        return self.split[2]
 
     def strike_price(self):
         """
         Return the strike price of this option, derived from contract symbol
         """
-        return float(re.split(r'(\d+)', self.contract)[3]) / 1000.0
+        return float(self.split[3]) / 1000.0
 
     def get_info(self):
         """
@@ -444,7 +453,12 @@ class Option(models.Model):
         if not self.expiration():
             return None
         expdate = str(self.expiration().date())
-        df = tick.option_chain(date=expdate)
+        try:
+            df = tick.option_chain(date=expdate)
+        except ValueError:
+            error = f"No contract exists for {str(self.ticker())} with expiration date {expdate}."
+            print(error)
+            return None
         if self.option_type() == 'C':
             options = df.calls.set_index('contractSymbol').T.to_dict()
         elif self.option_type() == 'P':

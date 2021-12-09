@@ -4,7 +4,7 @@ build:
 	python .\manage.py runserver
 
 test:
-	coverage run --source='.' manage.py test
+	coverage run manage.py test
 	coverage html
 
 # Run trade_simulation tests only
