@@ -35,6 +35,7 @@ from .utils import find_game_by_title, find_portfolio, find_holding, find_option
 TEST_GAME_TITLE = "Game Title"
 TEST_RULES = "Test Rules"
 TEST_PORTFOLIO_TITLE = "Portfolio Title"
+TEST_STARTING_BALANCE = 30000
 
 GAME_URL = "/game/"
 PORTFOLIO_URL = "/portfolio/"
@@ -56,7 +57,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         title = TEST_GAME_TITLE
         # WHEN
-        _create_game_helper(title, TEST_RULES, 10000)
+        _create_game_helper(title, TEST_RULES, TEST_STARTING_BALANCE)
         games = Game.objects.all()
         # THEN
         assert len(games) == 1
@@ -70,7 +71,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         title = TEST_GAME_TITLE
         # WHEN
-        _create_game_helper(title, TEST_RULES, 10000)
+        _create_game_helper(title, TEST_RULES, TEST_STARTING_BALANCE)
         games = Game.objects.all()
         # THEN
         assert len(games) == 1
@@ -88,7 +89,7 @@ class HelperTestCase(TestCase):
         title = TEST_GAME_TITLE
         # WHEN / THEN
         with self.assertRaises(Exception):
-            _create_game_helper(title, TEST_RULES, 10000)
+            _create_game_helper(title, TEST_RULES, TEST_STARTING_BALANCE)
 
     def test_get_game_standings_helper(self):
         """
@@ -97,7 +98,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         for i in range(3):
             title = f"{TEST_GAME_TITLE} {i}"
-            _create_game_helper(title, TEST_RULES, 10000)
+            _create_game_helper(title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN
         actual = _get_game_standings_helper()
         # THEN
@@ -120,7 +121,7 @@ class HelperTestCase(TestCase):
         """
         # GIVEN
         title = TEST_GAME_TITLE
-        _create_game_helper(title, TEST_RULES, 10000)
+        _create_game_helper(title, TEST_RULES, TEST_STARTING_BALANCE)
 
         # WHEN
         _delete_game_helper(title)
@@ -145,7 +146,7 @@ class HelperTestCase(TestCase):
         Test that we can get a game successfully
         """
         title = TEST_GAME_TITLE
-        _create_game_helper(title, TEST_RULES, 10000)
+        _create_game_helper(title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN
         game = _get_game_helper(title)
         # THEN
@@ -168,7 +169,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
 
         # WHEN
@@ -184,7 +185,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
 
         # WHEN / THEN
         with self.assertRaises(Exception):
@@ -196,7 +197,7 @@ class HelperTestCase(TestCase):
         """
         # GIVEN
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         for i in range(3):
             portfolio_title = f"{TEST_PORTFOLIO_TITLE} {i}"
             _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
@@ -214,7 +215,7 @@ class HelperTestCase(TestCase):
         """
         # GIVEN
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_portfolios_helper()
@@ -226,7 +227,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN
         _delete_portfolio_helper(portfolio_title, game_title)
@@ -241,7 +242,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _delete_portfolio_helper(portfolio_title, game_title)
@@ -264,7 +265,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         with self.assertRaises(Exception):
@@ -277,7 +278,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _post_portfolio_helper(portfolio_title, game_title, None)
@@ -289,7 +290,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _post_portfolio_helper(portfolio_title, game_title, "ldsakfkwdsj")
@@ -302,7 +303,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -321,7 +322,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -342,7 +343,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -362,7 +363,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 30000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "TSLA"
         shares = 2
@@ -383,7 +384,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _trade_stock_helper(portfolio_title, game_title, "AAPL", 3)
@@ -396,7 +397,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 1.0
@@ -414,7 +415,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 1.0
@@ -432,7 +433,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _trade_option_helper(portfolio_title, game_title, "AAPL211223C00148000", 1.0)
@@ -444,7 +445,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -461,7 +462,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_holding_helper(portfolio_title, game_title, "AAPL")
@@ -473,7 +474,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 1.0
@@ -490,7 +491,7 @@ class HelperTestCase(TestCase):
         # GIVEN
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         with self.assertRaises(Exception):
             _get_option_helper(portfolio_title, game_title, "AAPL211223C00148000")
@@ -520,7 +521,7 @@ class ViewTestCase(TestCase):
         # GIVEN
         request = self.factory.get('/games/')
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_games(request).status_code, 200)
 
@@ -531,7 +532,7 @@ class ViewTestCase(TestCase):
         # GIVEN
         request = self.factory.get(GAME_URL)
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_game(request, game_title).status_code, 200)
 
@@ -542,7 +543,7 @@ class ViewTestCase(TestCase):
         # GIVEN
         request = self.factory.get(GAME_URL)
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
 
@@ -561,10 +562,10 @@ class ViewTestCase(TestCase):
         Tests failure on creating games
         """
         # GIVEN
-        data = {'rules': 'kill or be killed', 'startingBalance': 15000}
+        data = {'rules': 'kill or be killed', 'startingBalance': TEST_STARTING_BALANCE}
         request = self.factory.post(GAME_URL, data)
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_game(request, game_title).status_code, 500)
 
@@ -575,7 +576,7 @@ class ViewTestCase(TestCase):
         # GIVEN
         request = self.factory.delete(GAME_URL)
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_game(request, game_title).status_code, 200)
 
@@ -586,7 +587,7 @@ class ViewTestCase(TestCase):
         # GIVEN
         request = self.factory.delete(GAME_URL)
         game_title = TEST_GAME_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
 
@@ -598,7 +599,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get('/portfolios/')
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolios(request).status_code, 200)
@@ -611,7 +612,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(PORTFOLIO_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, TEST_GAME_TITLE, TEST_PORTFOLIO_TITLE).status_code, 200)
@@ -624,7 +625,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(PORTFOLIO_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
@@ -638,7 +639,7 @@ class ViewTestCase(TestCase):
         request = self.factory.post(PORTFOLIO_URL, data)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 200)
 
@@ -651,7 +652,7 @@ class ViewTestCase(TestCase):
         request = self.factory.post(PORTFOLIO_URL, data)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 500)
@@ -664,7 +665,7 @@ class ViewTestCase(TestCase):
         request = self.factory.post(PORTFOLIO_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 500)
 
@@ -676,7 +677,7 @@ class ViewTestCase(TestCase):
         request = self.factory.delete(PORTFOLIO_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, game_title, portfolio_title).status_code, 200)
@@ -689,7 +690,7 @@ class ViewTestCase(TestCase):
         request = self.factory.delete(PORTFOLIO_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(handle_portfolio(request, "BlahBlah", "BlahBlah").status_code, 500)
@@ -709,7 +710,7 @@ class ViewTestCase(TestCase):
                 "shares": 4.0,
                 }
         request = self.factory.post(TRADE_URL, data)
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 200)
@@ -729,7 +730,7 @@ class ViewTestCase(TestCase):
                 "shares": 4.0,
                 }
         request = self.factory.post(TRADE_URL, data)
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 500)
@@ -749,7 +750,7 @@ class ViewTestCase(TestCase):
                 "quantity": 1.0
                 }
         request = self.factory.post(TRADE_URL, data)
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 200)
@@ -769,7 +770,7 @@ class ViewTestCase(TestCase):
                 "quantity": 1.0
                 }
         request = self.factory.post(TRADE_URL, data)
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 500)
@@ -791,7 +792,7 @@ class ViewTestCase(TestCase):
                 "exercise": contract,
                 }
         request = self.factory.post(TRADE_URL, data)
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         _trade_option_helper(portfolio_title, game_title, contract, 1.0)
         # WHEN / THEN
@@ -806,7 +807,7 @@ class ViewTestCase(TestCase):
         request = self.factory.post(TRADE_URL, data)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         # WHEN / THEN
         self.assertEqual(trade(request).status_code, 500)
@@ -819,7 +820,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get('/holdings/')
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -835,7 +836,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(HOLDING_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -851,7 +852,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(HOLDING_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         # WHEN / THEN
@@ -865,7 +866,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get('/options/')
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 4.0
@@ -881,7 +882,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(OPTION_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         quantity = 4.0
@@ -897,7 +898,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(OPTION_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         contract = "AAPL211223C00148000"
         # WHEN / THEN
@@ -911,7 +912,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get('/transactions/')
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -927,7 +928,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(TRANSACTION_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
@@ -944,7 +945,7 @@ class ViewTestCase(TestCase):
         request = self.factory.get(TRANSACTION_URL)
         game_title = TEST_GAME_TITLE
         portfolio_title = TEST_PORTFOLIO_TITLE
-        _create_game_helper(game_title, TEST_RULES, 10000)
+        _create_game_helper(game_title, TEST_RULES, TEST_STARTING_BALANCE)
         _post_portfolio_helper(portfolio_title, game_title, self.test_user.username)
         ticker = "AAPL"
         shares = 3
