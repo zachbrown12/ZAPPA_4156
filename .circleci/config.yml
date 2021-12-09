@@ -56,14 +56,7 @@ jobs:
   postman-collection-run:
     executor: newman/postman-newman-docker
     steps:
-      - checkout
-      - restore_cache:
-          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
-      - run:
-          name: Run server
-          command: |
-            . venv/bin/activate
-            pipenv run python manage.py runserver    
+      - checkout   
       - newman/newman-run:
           collection: https://api.getpostman.com/collections/14941238-038eb57b-2eae-4982-9dc1-a5c505356fce?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
           environment: https://api.getpostman.com/environments/18292557-f5c92ab8-3de9-439e-8f1c-295f96a5135a?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
