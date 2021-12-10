@@ -3,7 +3,45 @@ orbs:
   sonarcloud: sonarsource/sonarcloud@1.0.2
   newman: postman/newman@0.0.2
 jobs:
-  build-job:
+  unittests-flake8:
+    docker:
+      - image: circleci/python:3.9.7
+      - image: circleci/postgres:10.5
+    working_directory: ~/app
+    steps:
+      - checkout
+      - restore_cache:
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
+      - run:
+          name: Install Python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - 'venv'
+      - run:
+          name: Add python project to path
+          command: 'echo "$(realpath .)/app" > venv/lib/python3.9/site-packages/app.pth'
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            pipenv run python manage.py test --noinput
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: tr1
+      - run:
+          name: Run Flake8
+          command: |
+            . venv/bin/activate
+            python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv,.venv/*,tests/*,venv,env,./env
+
+  postman-collection-run:
     docker:
       - image: circleci/python:3.9.7
       - image: circleci/postgres:10.5
@@ -37,40 +75,19 @@ jobs:
            python manage.py makemigrations
            python manage.py migrate
       - run:
-          name: Run tests
-          command: |
-            . venv/bin/activate
-            pipenv run python manage.py test --noinput
-      - store_test_results:
-          path: test-results
-      - store_artifacts:
-          path: test-results
-          destination: tr1
-      - run:
-          name: Run Flake8
-          command: |
-            . venv/bin/activate
-            python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv,.venv/*,tests/*,venv,env,./env
-      - run:
           name: run server
           command: |
             . venv/bin/activate
-            python manage.py runserver
+            python manage.py runserver 8000
           background: true
-
-  postman-collection-run:
-    executor: newman/postman-newman-docker
-    steps:
-      - newman/newman-run:
-          collection: https://api.getpostman.com/collections/14941238-038eb57b-2eae-4982-9dc1-a5c505356fce?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
-          environment: https://api.getpostman.com/environments/18292557-f5c92ab8-3de9-439e-8f1c-295f96a5135a?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
-          timeout: '300000' 
+      - run:
+          name: run newman
+          command: |
+            newman run https://api.getpostman.com/collections/14941238-038eb57b-2eae-4982-9dc1-a5c505356fce?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 -e https://api.getpostman.com/environments/18292557-f5c92ab8-3de9-439e-8f1c-295f96a5135a?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
 
 workflows:
   version: 2
   build-deploy:
     jobs:
-      - build-job
-      - postman-collection-run:
-          requires:
-            - build-job
+      - unittests-flake8
+      - postman-collection-run
