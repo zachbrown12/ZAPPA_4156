@@ -40,7 +40,7 @@ jobs:
           name: Run tests
           command: |
             . venv/bin/activate
-            pipenv run python manage.py test
+            pipenv run python manage.py test --noinput
       - store_test_results:
           path: test-results
       - store_artifacts:
