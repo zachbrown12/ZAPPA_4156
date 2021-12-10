@@ -43,8 +43,6 @@ jobs:
 
   postman-collection-run:
     executor: newman/postman-newman-docker
-      - image: circleci/python:3.9.7
-      - image: circleci/postgres:10.5
     environment:
       DATABASE_URL: postgres://postgres:@localhost/circle_test
       DJANGO_SECRET_KEY: test
