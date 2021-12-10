@@ -51,12 +51,10 @@ def _create_game_helper(title, rules, starting_balance):
         raise ValueError(error)
 
     try:
-        game = Game.objects.create()
-        game.title = title
-        game.rules = rules
         if starting_balance:
-            game.starting_balance = float(starting_balance)
-        game.save()
+            Game.objects.create(title=title, rules=rules, starting_balance=float(starting_balance))
+        else:
+            Game.objects.create(title=title, rules=rules)
         print("Successfully created new game.")
     except RuntimeError:
         error = f"Error occurs when creating the game {title}."
@@ -167,14 +165,12 @@ def _post_portfolio_helper(title, game_title, username):
         raise ValueError(error)
 
     try:
-        portfolio = Portfolio.objects.create()
-        portfolio.owner = user
-        portfolio.game = game
-        portfolio.cash_balance = float(game.starting_balance)
-        portfolio.total_value = float(game.starting_balance)
-        portfolio.title = title
+        Portfolio.objects.create(owner=user,
+                                 game=game,
+                                 cash_balance=float(game.starting_balance),
+                                 total_value=float(game.starting_balance),
+                                 title=title)
         print(user)
-        portfolio.save()
         print(
             f"Successfully created new portfolio with title {title} in game {game_title}."
         )
