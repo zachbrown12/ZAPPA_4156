@@ -1,6 +1,17 @@
-from .serializers import GameSerializer, PortfolioSerializer, HoldingSerializer, OptionSerializer
+from .serializers import (
+    GameSerializer,
+    PortfolioSerializer,
+    HoldingSerializer,
+    OptionSerializer,
+)
 from trade_simulation.models import Game, Portfolio, Holding, Option
-from .utils import find_game_by_title, find_portfolio, find_holding, find_option, find_user_by_username
+from .utils import (
+    find_game_by_title,
+    find_portfolio,
+    find_holding,
+    find_option,
+    find_user_by_username,
+)
 
 
 def _get_game_standings_helper():
@@ -51,11 +62,9 @@ def _create_game_helper(title, rules, starting_balance):
         raise ValueError(error)
 
     try:
-        game = Game.objects.create()
-        game.title = title
-        game.rules = rules
-        if starting_balance:
-            game.starting_balance = float(starting_balance)
+        game = Game.objects.create(
+            title=title, rules=rules, starting_balance=float(starting_balance)
+        )
         game.save()
         print("Successfully created new game.")
     except RuntimeError:

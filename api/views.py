@@ -56,7 +56,9 @@ def handle_games(request):
     """
     Function that handles getting all created games
     """
-    return Response(_get_game_standings_helper())
+    games = _get_game_standings_helper()
+    resp = Response(games)
+    return resp
 
 
 @api_view(["GET", "POST", "DELETE"])
@@ -116,8 +118,12 @@ def handle_portfolio(request, game_title, port_title):
     # On a POST request create the portfolio or throw an error
     elif request.method == POST_METHOD:
         try:
-            if not ("username" in request.data and len(request.data.get("username")) > 0):
-                error = "Cannot create portfolio: username not found in body of request."
+            if not (
+                "username" in request.data and len(request.data.get("username")) > 0
+            ):
+                error = (
+                    "Cannot create portfolio: username not found in body of request."
+                )
                 print(error)
                 raise KeyError(error)
             username = request.data.get("username").lower()
@@ -151,7 +157,9 @@ def trade(request):
         if "exercise" in request.data:
             exercise = request.data.get("exercise")
         try:
-            _trade_stock_helper(portfolio_title, game_title, ticker, shares, exercise=exercise)
+            _trade_stock_helper(
+                portfolio_title, game_title, ticker, shares, exercise=exercise
+            )
         except Exception as e:
             return Response(status=500, data=str(e))
         return Response()

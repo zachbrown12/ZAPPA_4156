@@ -34,13 +34,13 @@ jobs:
           name: Migrate DB
           command: |
            . venv/bin/activate
-           python manage.py migrate
            python manage.py makemigrations
+           python manage.py migrate
       - run:
           name: Run tests
           command: |
             . venv/bin/activate
-            pipenv run python manage.py test
+            pipenv run python manage.py test --noinput
       - store_test_results:
           path: test-results
       - store_artifacts:
