@@ -72,5 +72,5 @@ workflows:
     jobs:
       - build-job
       - postman-collection-run:
-        requires:
-          - build-job
+          requires:
+            - build-job
