@@ -34,8 +34,8 @@ jobs:
           name: Migrate DB
           command: |
            . venv/bin/activate
-           python manage.py migrate
            python manage.py makemigrations
+           python manage.py migrate
       - run:
           name: Run tests
           command: |
@@ -63,7 +63,6 @@ jobs:
       DJANGO_READ_DOT_ENV_FILE: True
       DJANGO_SETTINGS_MODULE: zappa.settings
     working_directory: ~/app
-    executor: newman/postman-newman-docker
     steps:
       - checkout
       - restore_cache:
@@ -85,14 +84,15 @@ jobs:
           name: Migrate DB
           command: |
             . venv/bin/activate
-            python manage.py migrate
             python manage.py makemigrations
+            python manage.py migrate
       - run:
           name: run server
           command: |
             . venv/bin/activate
             python manage.py runserver
           background: true
+      executor: newman/postman-newman-docker
       - newman/newman-run:
           collection: https://api.getpostman.com/collections/14941238-038eb57b-2eae-4982-9dc1-a5c505356fce?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
           environment: https://api.getpostman.com/environments/18292557-f5c92ab8-3de9-439e-8f1c-295f96a5135a?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
