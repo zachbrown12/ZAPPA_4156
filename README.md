@@ -4,7 +4,7 @@
 
 <p>This project is an API for creating competitive stock-trading games, in which the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
 
-<h3>Architecture v1.0</h3>
+<h3>Architecture v2.0</h3>
 
 <img src="images/architecture.png" width="600" />
  
@@ -12,7 +12,7 @@
  <h3>URL</h3>
  https://zappa-api.herokuapp.com/api
  
-<h3>Database v1.0</h3>
+<h3>Database v2.0</h3>
 
 <img src="images/db.png" width="1000" />
 
@@ -20,11 +20,11 @@
 
 Our main application logic is contained within:
 <ul>
-  <li>zappa/api/helpers.py</li> 
-  <li>zappa/api/serializers.py</li>
-  <li>zappa/api/utils.py</li>
-  <li>zappa/api/views.py</li>
-  <li>zappa/trade_simulation/models.py</li>
+  <li>api/helpers.py</li> 
+  <li>api/serializers.py</li>
+  <li>api/utils.py</li>
+  <li>api/views.py</li>
+  <li>trade_simulation/models.py</li>
 </ul>
 
 <h3> System tests </h3>
@@ -33,7 +33,7 @@ We have a suite of system tests using Postman, under the <a href="https://columb
 
 <h3> Unit tests </h3>
 
-To run our unit tests check our htmlcov file or, run coverage run --source='.' zappa/manage.py test zappa.<br/>
+To run our unit tests check our htmlcov file or, run coverage run --source='.' manage.py test zappa.<br/>
 Currently our coverage is at 89% which we hope to increase with each iteration.<br/>
 
 <h3>Style compliance</h3>
