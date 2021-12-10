@@ -49,6 +49,16 @@ jobs:
       #- sonarcloud/scan
 
   flake8-test:
+    docker:
+      - image: circleci/python:3.9.7
+      - image: circleci/postgres:10.5
+    environment:
+      DATABASE_URL: postgres://postgres:@localhost/circle_test
+      DJANGO_SECRET_KEY: test
+      DJANGO_READ_DOT_ENV_FILE: True
+      DJANGO_SETTINGS_MODULE: zappa.settings
+    working_directory: ~/app
+    steps:
       - run:
           name: Run Flake8
           command: |
@@ -69,5 +79,6 @@ workflows:
   build-deploy:
     jobs:
       - build-job
-      - postman-collection-run
       - flake8-test
+      - postman-collection-run
+      
