@@ -3,7 +3,7 @@ orbs:
   sonarcloud: sonarsource/sonarcloud@1.0.2
   newman: postman/newman@0.0.2
 jobs:
-  build-job:
+  run-tests:
     docker:
       - image: circleci/python:3.9.7
       - image: circleci/postgres:10.5
@@ -94,7 +94,7 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - build-job
+      - run-tests
       - flake8-test
       - postman-collection-run
       
