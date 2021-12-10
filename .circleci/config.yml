@@ -81,12 +81,6 @@ jobs:
           name: Add python project to path
           command: 'echo "$(realpath .)/app" > venv/lib/python3.9/site-packages/app.pth'
       - run:
-          name: Migrate DB
-          command: |
-            . venv/bin/activate
-            python manage.py makemigrations
-            python manage.py migrate
-      - run:
           name: run server
           command: |
             . venv/bin/activate
