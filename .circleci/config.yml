@@ -41,49 +41,13 @@ jobs:
             python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv,.venv/*,tests/*,venv,env,./env
 
   postman-collection-run:
-    docker:
-      - image: circleci/python:3.9.7
-      - image: circleci/postgres:10.5
-      - image: postman/newman:4.4.1
-    environment:
-      DATABASE_URL: postgres://postgres:@localhost/circle_test
-      DJANGO_SECRET_KEY: test
-      DJANGO_READ_DOT_ENV_FILE: True
-      DJANGO_SETTINGS_MODULE: zappa.settings
-    working_directory: ~/app
+    executor: newman/postman-newman-docker
     steps:
       - checkout
-      - restore_cache:
-          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
-      - run:
-          name: Install Python dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-      - save_cache:
-          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
-          paths:
-            - 'venv'
-      - run:
-          name: Add python project to path
-          command: 'echo "$(realpath .)/app" > venv/lib/python3.9/site-packages/app.pth'
-      - run:
-          name: Migrate DB
-          command: |
-           . venv/bin/activate
-           python manage.py makemigrations
-           python manage.py migrate
-      - run:
-          name: run server
-          command: |
-            . venv/bin/activate
-            python manage.py runserver 8000
-          background: true
       - newman/newman-run:
           collection: https://api.getpostman.com/collections/14941238-038eb57b-2eae-4982-9dc1-a5c505356fce?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
-          environment: https://api.getpostman.com/environments/18292557-f5c92ab8-3de9-439e-8f1c-295f96a5135a?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
-          timeout: '300000' 
+          # environment: https://api.getpostman.com/environments/18292557-f5c92ab8-3de9-439e-8f1c-295f96a5135a?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
+          timeout: '500000' 
 
 workflows:
   version: 2
