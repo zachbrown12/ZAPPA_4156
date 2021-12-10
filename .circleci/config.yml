@@ -1,57 +1,70 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.2
+  newman: postman/newman@0.0.2
 jobs:
-
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+  build-job:
     docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+      - image: circleci/python:3.9.7
+      - image: circleci/postgres:10.5
+    environment:
+      DATABASE_URL: postgres://postgres:@localhost/circle_test
+      DJANGO_SECRET_KEY: test
+      DJANGO_READ_DOT_ENV_FILE: True
+      DJANGO_SETTINGS_MODULE: zappa.settings
+    working_directory: ~/app
     steps:
       - checkout
+      - restore_cache:
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: Install Python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - 'venv'
+      - run:
+          name: Add python project to path
+          command: 'echo "$(realpath .)/app" > venv/lib/python3.9/site-packages/app.pth'
+      - run:
+          name: Migrate DB
+          command: |
+           . venv/bin/activate
+           python manage.py migrate
+           python manage.py makemigrations
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            pipenv run python manage.py test
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: tr1
+      - run:
+          name: Run Flake8
+          command: |
+            . venv/bin/activate
+            python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv,.venv/*,tests/*,venv,env,./env
+      #- sonarcloud/scan
 
-  # Build
-  build:
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+  postman-collection-run:
+    executor: newman/postman-newman-docker
     steps:
-      - run: python .\manage.py runserver
+      - checkout   
+      - newman/newman-run:
+          collection: https://api.getpostman.com/collections/14941238-038eb57b-2eae-4982-9dc1-a5c505356fce?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
+          # environment: https://api.getpostman.com/environments/18292557-f5c92ab8-3de9-439e-8f1c-295f96a5135a?apikey=PMAK-61b15c27106e710047f6ffad-aa2fe99c7ed57b05b599baed26f8df4c55 
+          timeout: '300000' 
 
-  # Run all tests and generate coverage
-  test:
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - run: coverage run --source='.' manage.py test
-
-  # Run flake8 and generate output to bugs.txt
-  flake8:
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - run: python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv > bugs.txt
-    
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
-   jobs:
-      - say-hello
-      - build
-      - test
-      - flake8
+  version: 2
+  build-deploy:
+    jobs:
+      - build-job
+      - postman-collection-run

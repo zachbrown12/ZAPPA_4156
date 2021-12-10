@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "users.apps.UsersConfig",
     "reactfrontend",
+    "django_nose",
 ]
 
 MIDDLEWARE = [
@@ -88,6 +89,7 @@ DATABASES = {
         "PASSWORD": "incaroads",
         "HOST": "database-1.c8j9g5p5qd7q.us-east-2.rds.amazonaws.com",
         "PORT": 5432,
+        "TEST": {"NAME": "test_zappa"},
     }
 }
 
@@ -128,6 +130,8 @@ STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+TEST_OUTPUT_DIR = "test-reports"
 
 if os.getcwd() == "/app":
     DEBUG = False
