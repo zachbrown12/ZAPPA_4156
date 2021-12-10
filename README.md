@@ -51,7 +51,7 @@ To run the tests for flake8 you may run python3 -m flake8 --extend-exclude=./.ve
 
 <li><h4>Static analysis</h4>
 We are using SonarCloud to check our code for bugs, vulnerabilities, security hotspots, and code smells.<br/> 
-Additionally, we are using SonarLint to catch a subset of these issues instantly in VSCode; this is limited by the fact that unlike SonarCloud, SonarLint only analyzes one file at a time.</li>
+Additionally, we are using SonarLint to catch a limited subset of these issues instantly in VSCode.</li>
 </ul>
 
 <h3>Packages needed for installation</h3>
@@ -98,13 +98,19 @@ Each Game contains Portfolios that compete against each other to attain the high
 <b>DELETE</b>   /api/game/{game_title} -- Deletes the game with title {game_title}. <br/>
 
 <h4>Portfolios</h4>
-Each Portfolio contains Holdings of stocks in various amounts. A Portfolio has a "title", a "cash_balance", a "total_value" computed from stock holdings plus cash balance, and a "game_rank" determined by how its total_value stacks up against other players.<br/><br/>
+Each Portfolio contains Holdings of stocks in various amounts. A Portfolio has a "title", a "cash_balance", a "total_value" computed from stock holdings plus cash balance, and a "game_rank" determined by how its total_value stacks up against other Portfolios in the same Game.<br/><br/>
 
 <b>GET</b>   /api/portfolios/ -- Returns the current status of all portfolios, including the current total_value of each, using stock bid prices at the time called.<br/>
 <b>GET</b>   /api/portfolio/{game_title}/{port_title} -- Returns the current status of the portfolio from {game_title} with the title {port_title}, including its current total_value, using stock bid prices at the time called.<br/>
 <b>POST</b>   /api/portfolio/{game_title}/{port_title} -- Creates a portfolio in game {game_title} with title {port_title}, with a starting cash_balance equal to the game's starting_balance.<br/> 
 <b>DELETE</b>   /api/portfolio/{game_title}/{port_title} -- Deletes the portfolio from {game_title} with title {port_title}.<br/> 
-<b>POST</b>   /api/portfolio/trade -- Performs a transaction on a portfolio. Requires parameters "portfolioTitle", "gameTitle", "ticker", and "shares". If the value of "shares" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "shares" shares of the stock with ticker "ticker". If the value of "shares" is negative, that portfolio will sell "shares" shares of that stock instead.<br/>
+<b>POST</b>   /api/portfolio/trade -- Performs a transaction on a portfolio. This can be one of two types depending on body parameters:
+<ul style="list-style-type:none">
+<li>If the value of the required parameter "securityType" is "stock", then parameters "portfolioTitle", "gameTitle", "ticker", and "shares" are required. If the value of "shares" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "shares" shares of the stock with ticker "ticker". If the value of "shares" is negative, that portfolio will sell "shares" shares of that stock instead.</br>
+Also, if the value of the optional parameter "exercise" is a contract symbol of an option in the portfolio that can be exercised to transact "shares" shares of the stock with ticker "ticker" at a different price, then that option will be exercised, and the quantity of that option in the portfolio will be correctly deducted.
+</li>
+<li>If the value of the required parameter "securityType" is "option", then parameters "portfolioTitle", "gameTitle", "contract", and "quantity" are required. If the value of "quantity" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "quantity" amount of options with contract "contract". If the value of "quantity" is negative, that portfolio will sell "quantity" options with that contract instead.</li>
+</ul>
 
 <h4>Holdings</h4>
 Each Holding represents shares of a stock held in a portfolio. A Holding has a "ticker" and a quantity "shares".<br/><br/>
