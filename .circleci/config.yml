@@ -6,7 +6,6 @@ jobs:
   unittests-flake8:
     docker:
       - image: circleci/python:3.9.7
-      - image: circleci/postgres:10.5
     working_directory: ~/app
     steps:
       - checkout
@@ -42,7 +41,10 @@ jobs:
             python3 -m flake8 --extend-exclude=./.venv,./zappa/.venv,.venv/*,tests/*,venv,env,./env
 
   postman-collection-run:
-    executor: newman/postman-newman-docker
+    docker:
+      - image: circleci/python:3.9.7
+      - image: circleci/postgres:10.5
+      - image: postman/newman:4.4.1
     environment:
       DATABASE_URL: postgres://postgres:@localhost/circle_test
       DJANGO_SECRET_KEY: test
