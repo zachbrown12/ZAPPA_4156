@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DataGrid }from '@mui/x-data-grid';
 
-export default function GameTable(data) {
+export default function GameTable(props) {
     const columns = [
         { field: 'title', headerName: 'Title', width: 150},
         {
@@ -31,7 +31,7 @@ export default function GameTable(data) {
     return (
         <DataGrid
             columns={columns}
-            rows={processGameData(data.data)}
+            rows={processGameData(props.data)}
         >
         </DataGrid>
     )

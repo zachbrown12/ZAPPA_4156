@@ -56,21 +56,15 @@ def _create_game_helper(title, rules, starting_balance):
     Returns: N/A or error
     """
     # title is a unique field
-    print("game helper")
     if Game.objects.filter(title=title).exists():
-        print("game exists")
         error = f"Game with title {title} already exists."
         print(error)
         raise Exception(error)
 
     try:
-        print("here")
-        game = Game.objects.create()
-        print("here")
-        game.title = title
-        game.rules = rules
-        if starting_balance:
-            game.starting_balance = float(starting_balance)
+        game = Game.objects.create(
+            title=title, rules=rules, starting_balance=float(starting_balance)
+        )
         game.save()
         print("Successfully created new game.")
     except RuntimeError:
