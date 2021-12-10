@@ -34,7 +34,7 @@ jobs:
           name: Migrate DB
           command: |
            . venv/bin/activate
-           python manage.py makemigrations
+           python manage.py makemigrations trade_simulation
            python manage.py migrate
       - run:
           name: Run tests
