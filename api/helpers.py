@@ -54,7 +54,7 @@ def _create_game_helper(title, rules, starting_balance):
         if starting_balance:
             Game.objects.create(title=title, rules=rules, starting_balance=float(starting_balance))
         else:
-            Game.objects.create(title=title, rules=rules)
+            Game.objects.create(title=title, rules=rules, starting_balance=float(10000))
         print("Successfully created new game.")
     except RuntimeError:
         error = f"Error occurs when creating the game {title}."
