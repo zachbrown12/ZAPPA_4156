@@ -9,6 +9,10 @@ import { Navigate } from "react-router-dom";
 export default function LandingPage(props) {
   const [newGameDialogVisible, setNewGameDialogVisible] = useState(false);
   let [gamesData, setGamesData] = useState([]);
+
+  // TODO update username when functionality for user log in implemented
+  const username = "test_user";
+
   const setVisible = () => {
     setNewGameDialogVisible(!newGameDialogVisible);
   };
@@ -37,13 +41,16 @@ export default function LandingPage(props) {
     <div>
       {props.loggedIn ? (
         <div>
-          <Button variant="contained" onClick={setVisible}>
-            Create New Game
-          </Button>
-          <Button variant="contained" onClick={logOutUser}>
-            Logout User {props.username}
-          </Button>
-          <GameTable data={gamesData}></GameTable>
+          <h1 style={{ margin: "20px" }}>Zappa Trade Simulation</h1>
+          <div style={{ margin: "20px", height: "50px" }}>
+            <Button variant="contained" onClick={setVisible}>
+              Create New Game
+            </Button>
+            <Button variant="contained" onClick={logOutUser}>
+              Logout User {props.username}
+            </Button>
+          </div>
+          <GameTable data={gamesData} username={props.username}></GameTable>
           {newGameDialogVisible ? (
             <NewGameDialog
               open={newGameDialogVisible}

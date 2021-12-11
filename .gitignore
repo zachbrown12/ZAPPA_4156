@@ -39,11 +39,11 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-#htmlcov/
+htmlcov/
 .tox/
 .nox/
-#.coverage
-#.coverage.*
+.coverage
+.coverage.*
 .cache
 nosetests.xml
 coverage.xml
@@ -61,7 +61,7 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-trade_simulation/migrations/*.py
+# trade_simulation/migrations/*.py
 
 # Flask stuff:
 instance/
@@ -135,3 +135,6 @@ dmypy.json
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# front end
+reactfrontend/package-lock.json
