@@ -63,6 +63,7 @@ def find_user_by_username(username):
     """
     Function that runs a query on the database to find user by username
     """
+    print(User.objects.all())
     try:
         user = User.objects.get(username=username)
         return user

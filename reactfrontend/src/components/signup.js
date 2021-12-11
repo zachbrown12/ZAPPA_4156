@@ -27,7 +27,7 @@ export default function Signup(props) {
       })
       .then((res) => {
         console.log(res.status);
-        window.location.replace("http://localhost:3000/games");
+        props.setLoggedIn(true);
       })
       .catch((err) => console.log(err.response.data)); // TODO: Add better error
   };
@@ -90,7 +90,11 @@ export default function Signup(props) {
               />{" "}
             </FormControl>
             <br></br>
-            <Button onClick={onSubmit} style={{ margin: "20px" }}>
+            <Button
+              variant="contained"
+              onClick={onSubmit}
+              style={{ margin: "20px" }}
+            >
               Sign up
             </Button>
             <br></br>

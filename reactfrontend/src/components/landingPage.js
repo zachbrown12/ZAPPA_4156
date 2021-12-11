@@ -10,9 +10,6 @@ export default function LandingPage(props) {
   const [newGameDialogVisible, setNewGameDialogVisible] = useState(false);
   let [gamesData, setGamesData] = useState([]);
 
-  // TODO update username when functionality for user log in implemented
-  const username = "test_user";
-
   const setVisible = () => {
     setNewGameDialogVisible(!newGameDialogVisible);
   };
