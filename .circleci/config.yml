@@ -80,6 +80,5 @@ workflows:
     jobs:
       - run-tests
       - flake8-test
-      - sonarcloud-scan
       - postman-collection-run
       
