@@ -28,7 +28,7 @@ jobs:
           name: Run tests
           command: |
             . venv/bin/activate
-            pipenv run coverage manage.py test --noinput
+            pipenv run coverage run manage.py test --noinput
             pipenv run coverage report
             pipenv run coverage html
       - store_artifacts:
