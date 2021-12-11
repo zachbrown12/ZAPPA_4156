@@ -4,9 +4,7 @@
 
 <p>This project is a combination of front-end program and an back-end API server for creating competitive stock-trading games, in which the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
 
-<h2>Online Endpoint<h2>
-
-<h3>Back-end API server</h3>
+<h2>Online Back-end API Endpoint<h2>
 https://zappa-api.herokuapp.com/api
 
 <h2>Local Installation</h2>
