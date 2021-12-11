@@ -7,25 +7,41 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { DialogContent, DialogActions, Checkbox } from "@mui/material";
 
-export default function TradeHoldingsDialog(props) {
+export default function TradeDialog(props) {
   const [ticker, setTicker] = useState("");
   const [shares, setShares] = useState(0);
   const [exercise, setExcercise] = useState(false);
-  const securityType = "stock";
+  const securityType = props.securityType;
 
   const trade = async () => {
-    let data = {
-      portfolioTitle: props.portfolioTitle,
-      gameTitle: props.gameTitle,
-      securityType: securityType,
-      ticker: ticker,
-      exercise: exercise,
-    };
-    if (props.type === "Sell") {
-      data.shares = -parseInt(shares);
+    let data = {};
+    if (securityType === "stock") {
+      data = {
+        portfolioTitle: props.portfolioTitle,
+        gameTitle: props.gameTitle,
+        securityType: securityType,
+        ticker: ticker,
+        exercise: exercise,
+      };
+      if (props.type === "Sell") {
+        data.shares = -parseInt(shares);
+      } else {
+        data.shares = parseInt(shares);
+      }
     } else {
-      data.shares = parseInt(shares);
+      data = {
+        portfolioTitle: props.portfolioTitle,
+        gameTitle: props.gameTitle,
+        securityType: securityType,
+        contract: ticker,
+      };
+      if (props.type === "Sell") {
+        data.quantity = -parseInt(shares);
+      } else {
+        data.quantity = parseInt(shares);
+      }
     }
+
     data = JSON.stringify(data);
     axios
       .post(`/api/portfolio/trade`, data, {
@@ -65,23 +81,27 @@ export default function TradeHoldingsDialog(props) {
       <DialogContent>
         <TextField
           id="outlined-basic"
-          label="Ticker"
+          label={props.tickLabel}
           variant="outlined"
           value={ticker}
           onChange={handleTickerChange}
         />
         <TextField
           id="outlined-basic"
-          label="Number of Shares"
+          label={props.sharesLabel}
           variant="outlined"
           value={shares}
           onChange={handleSharesChange}
         />
-        <Checkbox
-          checked={exercise}
-          onChange={handleExerciseChange}
-          label="Exercise"
-        />
+        {securityType === "Stock" ? (
+          <Checkbox
+            checked={exercise}
+            onChange={handleExerciseChange}
+            label="Exercise"
+          />
+        ) : (
+          <></>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>

@@ -5,8 +5,7 @@ import { DialogContent, DialogActions } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import { useState } from "react";
-import TradeHoldingsDialog from "./tradeHoldingsDialog";
-import TradeOptionsDialog from "./tradeOptionsDialog";
+import TradeDialog from "./tradeDialog";
 
 export default function ViewHoldingsDialog(props) {
   const [buyHoldingDialogVisible, setBuyHoldingDialogVisible] = useState(false);
@@ -100,46 +99,58 @@ export default function ViewHoldingsDialog(props) {
         </DialogActions>
       </Dialog>
       {buyHoldingDialogVisible ? (
-        <TradeHoldingsDialog
+        <TradeDialog
           open={buyHoldingDialogVisible}
           setDialogVisible={setBuyHoldingVisible}
           type={"Buy"}
           gameTitle={props.gameTitle}
           portfolioTitle={props.portfolioTitle}
-        ></TradeHoldingsDialog>
+          securityType={"stock"}
+          tickLabel={"Ticker"}
+          sharesLabel={"Number of Shares"}
+        ></TradeDialog>
       ) : (
         <></>
       )}
       {sellHoldingDialogVisible ? (
-        <TradeHoldingsDialog
+        <TradeDialog
           open={sellHoldingDialogVisible}
           setDialogVisible={setSellHoldingVisible}
           type={"Sell"}
           gameTitle={props.gameTitle}
           portfolioTitle={props.portfolioTitle}
-        ></TradeHoldingsDialog>
+          securityType={"stock"}
+          tickLabel={"Ticker"}
+          sharesLabel={"Number of Shares"}
+        ></TradeDialog>
       ) : (
         <></>
       )}
       {buyOptionDialogVisible ? (
-        <TradeOptionsDialog
+        <TradeDialog
           open={buyOptionDialogVisible}
           setDialogVisible={setBuyOptionVisible}
           type={"Buy"}
           gameTitle={props.gameTitle}
           portfolioTitle={props.portfolioTitle}
-        ></TradeOptionsDialog>
+          securityType={"option"}
+          tickLabel={"Contract"}
+          sharesLabel={"Quantity"}
+        ></TradeDialog>
       ) : (
         <></>
       )}
       {sellOptionDialogVisible ? (
-        <TradeOptionsDialog
+        <TradeDialog
           open={sellOptionDialogVisible}
           setDialogVisible={setSellOptionVisible}
           type={"Sell"}
           gameTitle={props.gameTitle}
           portfolioTitle={props.portfolioTitle}
-        ></TradeOptionsDialog>
+          securityType={"option"}
+          tickLabel={"Contract"}
+          sharesLabel={"Quantity"}
+        ></TradeDialog>
       ) : (
         <></>
       )}
