@@ -4,13 +4,18 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { DialogContent, DialogActions } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
-import HoldingsDialog from "./holdingsDialog";
+import ViewHoldingsDialog from "./viewHoldingsDialog";
 import { useState } from "react";
 import axios from "axios";
 
 export default function PortfoliosDialog(props) {
   let [holdingsDialogVisible, setHoldingsDialogVisible] = useState(false);
-  let [selectedRowData, setSelectedRowData] = useState([]);
+  let [selectedRowData, setSelectedRowData] = useState({
+    holdings: [],
+    options: [],
+  });
+  let [selectedPortfolioTitle, setSelectedPortfolioTitle] = useState("");
+
   const columns = [
     { field: "game_rank", headerName: "Ranking", width: 100 },
     { field: "title", headerName: "Portfolio Title", width: 400 },
@@ -42,14 +47,15 @@ export default function PortfoliosDialog(props) {
     axios
       .get(`/api/portfolio/${props.gameTitle}/${portfolioName}`)
       .then((res) => {
-        console.log(res);
-        setSelectedRowData(res.data.holdings);
+        console.log(res.data);
+        setSelectedRowData(res.data);
       })
       .catch((err) => console.log(err.response.data));
   };
 
   const handleOnRowClick = async (e) => {
     await getPortfolio(e.row.title);
+    setSelectedPortfolioTitle(e.row.title);
     setHoldingsDialogVisible(true);
   };
 
@@ -75,12 +81,14 @@ export default function PortfoliosDialog(props) {
         </DialogActions>
       </Dialog>
       {holdingsDialogVisible ? (
-        <HoldingsDialog
+        <ViewHoldingsDialog
           open={holdingsDialogVisible}
           setDialogVisible={setHoldingsDialogVisible}
-          holdings={selectedRowData}
-          portfolioTitle={selectedRowData.title}
-        ></HoldingsDialog>
+          holdings={selectedRowData.holdings}
+          options={selectedRowData.options}
+          portfolioTitle={selectedPortfolioTitle}
+          gameTitle={props.gameTitle}
+        ></ViewHoldingsDialog>
       ) : (
         <></>
       )}

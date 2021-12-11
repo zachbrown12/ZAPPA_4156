@@ -38,9 +38,11 @@ export default function NewGameDialog(props) {
   const handleNameChange = (e) => {
     setName(e.target.value);
   };
+
   const handleStartingBalanceChange = (e) => {
     setStartingBalance(e.target.value);
   };
+
   const handleRulesChange = (e) => {
     setRules(e.target.value);
   };
@@ -48,7 +50,7 @@ export default function NewGameDialog(props) {
   return (
     <Dialog onClose={handleClose} open={props.open}>
       <DialogTitle>Create New Game</DialogTitle>
-      <DialogContent>
+      <DialogContent style={{ display: "contents" }}>
         <TextField
           id="outlined-basic"
           label="Name"

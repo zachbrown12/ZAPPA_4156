@@ -44,22 +44,24 @@ export default function GameTable(props) {
   };
 
   return (
-    <div>
-      <DataGrid
-        columns={columns}
-        rows={processGameData(props.data)}
-        onRowDoubleClick={handleOnRowClick}
-      ></DataGrid>
-      {portfoliosDialogVisible ? (
-        <PortfoliosDialog
-          open={portfoliosDialogVisible}
-          setDialogVisible={setVisible}
-          portfolios={selectedRowData.portfolios}
-          gameTitle={selectedRowData.title}
-        ></PortfoliosDialog>
-      ) : (
-        <></>
-      )}
+    <div style={{ display: "flex", height: "100%" }}>
+      <div style={{ flexGrow: 1 }}>
+        <DataGrid
+          columns={columns}
+          rows={processGameData(props.data)}
+          onRowDoubleClick={handleOnRowClick}
+        ></DataGrid>
+        {portfoliosDialogVisible ? (
+          <PortfoliosDialog
+            open={portfoliosDialogVisible}
+            setDialogVisible={setVisible}
+            portfolios={selectedRowData.portfolios}
+            gameTitle={selectedRowData.title}
+          ></PortfoliosDialog>
+        ) : (
+          <></>
+        )}
+      </div>
     </div>
   );
 }

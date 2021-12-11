@@ -8,6 +8,7 @@ import NewGameDialog from "./newGameDialog";
 export default function LandingPage() {
   const [newGameDialogVisible, setNewGameDialogVisible] = useState(false);
   let [gamesData, setGamesData] = useState([]);
+
   const setVisible = () => {
     setNewGameDialogVisible(!newGameDialogVisible);
   };
@@ -29,9 +30,12 @@ export default function LandingPage() {
   }, []);
   return (
     <div>
-      <Button variant="contained" onClick={setVisible}>
-        Create New Game
-      </Button>
+      <h1 style={{ margin: "20px" }}>Zappa Trade Simulation</h1>
+      <div style={{ margin: "20px", height: "50px" }}>
+        <Button variant="contained" onClick={setVisible}>
+          Create New Game
+        </Button>
+      </div>
       <GameTable data={gamesData}></GameTable>
       {newGameDialogVisible ? (
         <NewGameDialog
