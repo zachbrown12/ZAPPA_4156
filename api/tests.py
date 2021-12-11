@@ -501,9 +501,7 @@ class ViewTestCase(TestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
-        self.test_user = User.objects.create_user(username='test_user',
-                                                  email='test@user.com',
-                                                  password='12345')
+        self.test_user = User.objects.create_user(username='test_user')
 
     def test_routes(self):
         """
@@ -547,15 +545,15 @@ class ViewTestCase(TestCase):
         # WHEN / THEN
         self.assertEqual(handle_game(request, "BlahBlah").status_code, 500)
 
-    # def test_handle_game_post(self):
-    #    """
-    #    Tests that we can create a game successfully
-    #    """
-    #    # GIVEN
-    #    request = self.factory.post(GAME_URL)
-    #    game_title = TEST_GAME_TITLE
-    #    # WHEN / THEN
-    #    self.assertEqual(handle_game(request, game_title).status_code, 200)
+    def test_handle_game_post(self):
+        """
+        Tests that we can create a game successfully
+        """
+        # GIVEN
+        request = self.factory.post(GAME_URL)
+        game_title = TEST_GAME_TITLE
+        # WHEN / THEN
+        self.assertEqual(handle_game(request, game_title).status_code, 200)
 
     def test_handle_game_post_fail(self):
         """
