@@ -20,7 +20,7 @@ class LoginTestCase(TestCase):
                                                   email='test@user.com',
                                                   password='12345')
 
-    #def test_login_page(self):
+    # def test_login_page(self):
     #    """
     #    Test that we can log in
     #    """
