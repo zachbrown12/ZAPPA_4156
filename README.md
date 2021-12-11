@@ -6,13 +6,13 @@
 
 <h2>Online Program</h2>
 
-<p>We hold back-end server and front-end app in Heroku<p>
+<p>We hold back-end API server in Heroku, but client to run on "localhost"<p>
 
-<h3>Back-end API endpoint</h3>  
+<h3>Back-end API endpoint</h3>
 https://zappa-api.herokuapp.com/api
 
 <h3>Front-end app</h3>
-
+Following installation section to run client on "localhost".
 
 <h2>Local Installation</h2>
 
