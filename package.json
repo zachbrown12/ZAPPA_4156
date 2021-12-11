@@ -10,10 +10,6 @@
   "cacheDirectories": [
     "reactfrontend/node_modules"
   ],
-  "engines": {
-    "node": "16.13.1",
-    "npm": "8.1.2"
-  },
   "dependencies": {
     "bootstrap": "^4.6.0",
     "reactstrap": "^8.9.0",
