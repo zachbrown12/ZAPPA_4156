@@ -72,7 +72,7 @@ python .\manage.py runserver<br/>
 2. run frontend app <br/>
 npm start
 
-<h3>Available endpoints for the service</h3>
+<h2>Available endpoints for the backend API service</h2>
 
 Using the resource path http://zappa-api.herokuapp.com, the following methods are available:<br/>
 
