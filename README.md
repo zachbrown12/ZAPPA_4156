@@ -4,10 +4,15 @@
 
 <p>This project is a combination of front-end program and an back-end API server for creating competitive stock-trading games, in which the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
 
-<h2>Online Endpoint<h2>
+<h2>Online Program</h2>
 
-<h3>Back-end API server</h3>
+<p>We hold back-end API server in Heroku, but client to run on "localhost"<p>
+
+<h3>Back-end API endpoint</h3>
 https://zappa-api.herokuapp.com/api
+
+<h3>Client app</h3>
+Following installation section to run client on "localhost".
 
 <h2>Local Installation</h2>
 
@@ -19,7 +24,7 @@ This repository does not include third-party code other than the auto-generated 
 pip install -r .\requirements.txt<br/>
 
 2. To install all required packages for front-end:<br/>
-cd .\reactfrontend
+cd .\reactfrontend <br/>
 npm install
 
 <h3>How to run the program</h3>
@@ -27,8 +32,8 @@ npm install
 1. run backend server <br/>
 python .\manage.py runserver<br/>
 
-2. run frontend app <br/>
-cd .\reactfrontend
+2. run client app <br/>
+cd .\reactfrontend <br/>
 npm start
 
 <h2>Architecture and Technology</h2>
