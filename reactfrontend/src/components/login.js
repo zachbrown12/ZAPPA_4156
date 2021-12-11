@@ -4,14 +4,13 @@ import { Navigate } from "react-router-dom";
 import { FormControl, Input, InputLabel, Button } from "@mui/material";
 
 export default function Login(props) {
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const onSubmit = (e) => {
     e.preventDefault();
 
     const user = {
-      username: username,
+      username: props.username,
       password: password,
     };
 
@@ -42,9 +41,9 @@ export default function Login(props) {
             <Input
               name="username"
               type="username"
-              value={username}
+              value={props.username}
               required
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => props.setUsername(e.target.value)}
             />{" "}
           </FormControl>
           <br></br>
@@ -65,7 +64,11 @@ export default function Login(props) {
             />{" "}
           </FormControl>
           <br></br>
-          <Button onClick={onSubmit} style={{ margin: "20px" }}>
+          <Button
+            variant="contained"
+            onClick={onSubmit}
+            style={{ margin: "20px" }}
+          >
             Login
           </Button>
         </div>

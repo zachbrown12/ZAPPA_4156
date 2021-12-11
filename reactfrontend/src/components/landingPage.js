@@ -23,6 +23,11 @@ export default function LandingPage(props) {
       .catch((err) => console.log(err));
   };
 
+  const logOutUser = () => {
+    props.setUsername("");
+    props.setLoggedIn(false);
+  };
+
   useEffect(() => {
     (async () => {
       await fetchGameData();
@@ -34,6 +39,9 @@ export default function LandingPage(props) {
         <div>
           <Button variant="contained" onClick={setVisible}>
             Create New Game
+          </Button>
+          <Button variant="contained" onClick={logOutUser}>
+            Logout User {props.username}
           </Button>
           <GameTable data={gamesData}></GameTable>
           {newGameDialogVisible ? (

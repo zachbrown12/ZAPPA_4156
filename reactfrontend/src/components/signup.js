@@ -4,7 +4,6 @@ import { Navigate } from "react-router-dom";
 import { FormControl, Input, InputLabel, Button } from "@mui/material";
 
 export default function Signup(props) {
-  const [username, setUsername] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
   const [existingUser, setExistingUser] = useState(false);
@@ -17,7 +16,7 @@ export default function Signup(props) {
     e.preventDefault();
 
     const user = {
-      username: username,
+      username: props.username,
       password1: password1,
       password2: password2,
     };
@@ -50,9 +49,9 @@ export default function Signup(props) {
               <Input
                 name="username"
                 type="username"
-                value={username}
+                value={props.username}
                 required
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => props.setUsername(e.target.value)}
               />{" "}
             </FormControl>
             <br></br>
@@ -95,7 +94,11 @@ export default function Signup(props) {
               Sign up
             </Button>
             <br></br>
-            <Button onClick={switchToLogin} stype={{ margin: "20px" }}>
+            <Button
+              variant="contained"
+              onClick={switchToLogin}
+              stype={{ margin: "20px" }}
+            >
               Log In Existing User
             </Button>
           </div>
