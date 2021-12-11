@@ -1,58 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from "react";
 import axios from "axios";
-import { API } from '../api-service';
-import { useCookies } from 'react-cookie';
+import { Navigate } from "react-router-dom";
+import { FormControl, Input, InputLabel, Button } from "@mui/material";
 
-function Login(){
+export default function Login(props) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [ username, setUsername ] = useState('');
-  const [ password, setPassword ] = useState('');
-  const [ isLoginView, setIsLoginView ] = useState(true);
+  const onSubmit = (e) => {
+    e.preventDefault();
 
-  const [token, setToken] = useCookies(['mr-token']);
+    const user = {
+      username: username,
+      password: password,
+    };
 
-  useEffect( () => {
-    if(token['mr-token']) window.location.href = '/games';
-  }, [token])
-
-  const loginClicked = () => {
-    API.loginUser({username, password})
-      .then( resp => setToken('mr-token', resp.token))
-      .catch( error => console.log(error))
-  }
-  const registerClicked = () => {
-    API.registerUser({username, password})
-      .then( () => loginClicked())
-      .catch( error => console.log(error))
-  }
-
-  const isDisabled = username.length === 0 || password.length === 0;
+    axios
+      .post(`/users/login/`, JSON.stringify(user), {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((res) => {
+        console.log(res.status);
+        props.setLoggedIn(true);
+      })
+      .catch((err) => console.log(err.response.data)); // TODO: Add better error
+  };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        {isLoginView ? <h1>Login</h1> : <h1>Register</h1>}
-      </header>
-      <div className="login-container">
-        <label htmlFor="username">Username</label><br/>
-        <input id="username" type="text" placeholder="username" value={username}
-              onChange={ evt=> setUsername(evt.target.value)}
-        /><br/>
-        <label htmlFor="password">Password</label><br/>
-        <input id="password" type="password" placeholder="Descriptiom" value={password}
-            onChange={ evt=> setPassword(evt.target.value)} /><br/>
-            { isLoginView ?
-              <button onClick={loginClicked} disabled={isDisabled}>Login</button> : 
-              <button onClick={registerClicked} disabled={isDisabled}>Register</button>
-            }
-        
-        { isLoginView ?
-          <p onClick={()=> setIsLoginView(false)}>You don't have an account? Register here!</p> : 
-          <p onClick={()=> setIsLoginView(true)}>You already have an account? Login here</p>
-        }
-      </div>
+    <div>
+      {!props.loggedIn ? (
+        <div>
+          <h1 style={{ margin: "20px" }}>Login User</h1>
+          <FormControl
+            required={true}
+            variant="standard"
+            color="primary"
+            margin="normal"
+            style={{ margin: "20px" }}
+          >
+            <InputLabel htmlFor="username">Username</InputLabel>
+            <Input
+              name="username"
+              type="username"
+              value={username}
+              required
+              onChange={(e) => setUsername(e.target.value)}
+            />{" "}
+          </FormControl>
+          <br></br>
+          <FormControl
+            required={true}
+            variant="standard"
+            color="primary"
+            margin="normal"
+            style={{ margin: "20px" }}
+          >
+            <InputLabel htmlFor="password">Password</InputLabel> <br />
+            <Input
+              name="password"
+              type="password"
+              value={password}
+              required
+              onChange={(e) => setPassword(e.target.value)}
+            />{" "}
+          </FormControl>
+          <br></br>
+          <Button onClick={onSubmit} style={{ margin: "20px" }}>
+            Login
+          </Button>
+        </div>
+      ) : (
+        <Navigate to="/games" />
+      )}
     </div>
-  )
+  );
 }
-
-export default Login;

@@ -1,22 +1,27 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
+from rest_framework.decorators import api_view
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 
 
+@csrf_exempt
+@api_view(["POST"])
 def login_user(request):
     """
     Render a page to login the account
     """
+    print("in here!")
 
     if request.user.is_authenticated:
         return redirect("profiles")
 
     # post the login request and redirect
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = request.data.get("username")
+        password = request.data.get("password")
 
         # get the authorization
         try:
@@ -35,6 +40,7 @@ def login_user(request):
     return render(request, "login_register.html")
 
 
+@csrf_exempt
 def register_user(request):
     """
     Render a page to register a new user
