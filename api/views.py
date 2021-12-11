@@ -1,6 +1,9 @@
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from .serializers import HoldingSerializer, OptionSerializer, TransactionSerializer
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from .serializers import HoldingSerializer, OptionSerializer, TransactionSerializer, UserSerializer
 from trade_simulation.models import Game, Portfolio, Holding, Option, Transaction
 from .helpers import (
     _get_game_standings_helper,
@@ -35,6 +38,8 @@ def get_routes(request):
         {"GET": GAME_URL},
         {"POST": GAME_URL},
         {"DELETE": GAME_URL},
+        {"GET": "/api/users"},
+        {"POST": "/api/users"},
         {"GET": "/api/portfolios"},
         {"GET": PORTFOLIO_URL},
         {"POST": PORTFOLIO_URL},
@@ -49,6 +54,22 @@ def get_routes(request):
     ]
 
     return Response(routes)
+
+
+@api_view(["GET", "POST"])
+def handle_users(request):
+    if request.method == GET_METHOD:
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        userResponse = serializer.data
+        resp = Response(userResponse)
+        return resp
+    elif request.method == POST_METHOD:
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = User.objects.create_user(username=username, password=password)
+        Token.objects.create(user=user)
+        return Response()
 
 
 @api_view(["GET"])

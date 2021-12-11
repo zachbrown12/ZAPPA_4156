@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "trade_simulation.apps.TradeSimulationConfig",
     "rest_framework",
+    "rest_framework.authtoken",
     "users.apps.UsersConfig",
     "reactfrontend",
 ]
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "zappa.urls"
@@ -121,14 +123,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-REACT_APP_DIR = os.path.join(BASE_DIR, 'reactfrontend')
+REACT_APP_DIR = os.path.join(BASE_DIR, "reactfrontend")
 
-STATICFILES_DIRS = [
-    os.path.join(REACT_APP_DIR, 'build', 'static'),
-]
+STATICFILES_DIRS = [os.path.join(REACT_APP_DIR, "build", "static")]
 
 
 # Default primary key field type
@@ -137,6 +137,8 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 TEST_OUTPUT_DIR = "test-reports"
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 if os.getcwd() == "/app":
     DEBUG = False
