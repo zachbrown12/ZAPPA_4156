@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import ViewHoldingsDialog from "./viewHoldingsDialog";
 import { useState } from "react";
 import axios from "axios";
+import NewPortfolioDialog from "./newPortfolioDialog";
 
 export default function PortfoliosDialog(props) {
   let [holdingsDialogVisible, setHoldingsDialogVisible] = useState(false);
@@ -15,6 +16,8 @@ export default function PortfoliosDialog(props) {
     options: [],
   });
   let [selectedPortfolioTitle, setSelectedPortfolioTitle] = useState("");
+  let [createNewPortfolioVisible, setCreateNewPortfolioVisible] =
+    useState(false);
 
   const columns = [
     { field: "game_rank", headerName: "Ranking", width: 100 },
@@ -59,6 +62,14 @@ export default function PortfoliosDialog(props) {
     setHoldingsDialogVisible(true);
   };
 
+  const createNewPortfolio = () => {
+    setCreateNewPortfolioVisible(true);
+  };
+
+  const changeCreateNewPortfolioVisible = () => {
+    setCreateNewPortfolioVisible(!createNewPortfolioVisible);
+  };
+
   return (
     <div>
       <Dialog
@@ -77,6 +88,7 @@ export default function PortfoliosDialog(props) {
           ></DataGrid>
         </DialogContent>
         <DialogActions>
+          <Button onClick={createNewPortfolio}>Create New Portfolio</Button>
           <Button onClick={handleClose}>Close</Button>
         </DialogActions>
       </Dialog>
@@ -89,6 +101,16 @@ export default function PortfoliosDialog(props) {
           portfolioTitle={selectedPortfolioTitle}
           gameTitle={props.gameTitle}
         ></ViewHoldingsDialog>
+      ) : (
+        <></>
+      )}
+      {createNewPortfolioVisible ? (
+        <NewPortfolioDialog
+          open={createNewPortfolioVisible}
+          username={props.username}
+          setDialogVisible={changeCreateNewPortfolioVisible}
+          gameTitle={props.gameTitle}
+        ></NewPortfolioDialog>
       ) : (
         <></>
       )}

@@ -57,6 +57,7 @@ export default function GameTable(props) {
             setDialogVisible={setVisible}
             portfolios={selectedRowData.portfolios}
             gameTitle={selectedRowData.title}
+            username={props.username}
           ></PortfoliosDialog>
         ) : (
           <></>
