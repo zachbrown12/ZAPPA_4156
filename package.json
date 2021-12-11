@@ -1,4 +1,15 @@
 {
+  "name": "zappa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "",
+  "author": "team-zappa",
+  "scripts": {
+    "heroku-prebuild": "NODE_ENV=production cd reactfrontend/ && yarn install && yarn build && cd .."
+  },
+  "cacheDirectories": [
+    "reactfrontend/node_modules"
+  ],
   "dependencies": {
     "bootstrap": "^4.6.0",
     "reactstrap": "^8.9.0"
