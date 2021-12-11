@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import LandingPage from "./components/landingPage";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import "./App.css";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import getCookie from "./helpers/csrfHelper";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const csrftoken = getCookie("csrftoken");
 
   return (
     <div className="app">
@@ -21,6 +23,7 @@ function App() {
                 setLoggedIn={setLoggedIn}
                 username={username}
                 setUsername={setUsername}
+                csrftoken={csrftoken}
               />
             }
           />
@@ -32,6 +35,7 @@ function App() {
                 setLoggedIn={setLoggedIn}
                 username={username}
                 setUsername={setUsername}
+                csrftoken={csrftoken}
               />
             }
           />
