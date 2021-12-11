@@ -7,19 +7,16 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { DialogContent, DialogActions } from "@mui/material";
 
-export default function NewGameDialog(props) {
-  const [name, setName] = useState("");
-  const [startingBalance, setStartingBalance] = useState("");
-  const [rules, setRules] = useState("");
+export default function NewPortfolioDialog(props) {
+  const [title, setTitle] = useState("");
 
-  const createNewGame = async () => {
+  const createNewPortfolio = async () => {
     let data = JSON.stringify({
-      startingBalance: startingBalance,
-      rules: rules,
+      username: props.username,
     });
 
     axios
-      .post(`/api/game/${name}`, data, {
+      .post(`/api/portfolio/${props.gameTitle}/${title}/`, data, {
         headers: { "Content-Type": "application/json" },
       })
       .then((res) => console.log(res.status))
@@ -27,7 +24,7 @@ export default function NewGameDialog(props) {
   };
 
   const handleSave = async () => {
-    await createNewGame();
+    await createNewPortfolio();
     props.setDialogVisible();
   };
 
@@ -35,42 +32,20 @@ export default function NewGameDialog(props) {
     props.setDialogVisible();
   };
 
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleStartingBalanceChange = (e) => {
-    setStartingBalance(e.target.value);
-  };
-
-  const handleRulesChange = (e) => {
-    setRules(e.target.value);
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
   };
 
   return (
     <Dialog onClose={handleClose} open={props.open}>
-      <DialogTitle>Create New Game</DialogTitle>
+      <DialogTitle>Create New Portfolio</DialogTitle>
       <DialogContent style={{ display: "contents" }}>
         <TextField
           id="outlined-basic"
-          label="Name"
+          label="Title"
           variant="outlined"
-          value={name}
-          onChange={handleNameChange}
-        />
-        <TextField
-          id="outlined-basic"
-          label="Starting Balance"
-          variant="outlined"
-          value={startingBalance}
-          onChange={handleStartingBalanceChange}
-        />
-        <TextField
-          id="outlined-basic"
-          label="Rules"
-          variant="outlined"
-          value={rules}
-          onChange={handleRulesChange}
+          value={title}
+          onChange={handleTitleChange}
         />
       </DialogContent>
       <DialogActions>
