@@ -11,7 +11,7 @@
 <h3>Back-end API endpoint</h3>
 https://zappa-api.herokuapp.com/api
 
-<h3>Front-end app</h3>
+<h3>Client app</h3>
 Following installation section to run client on "localhost".
 
 <h2>Local Installation</h2>
@@ -32,7 +32,7 @@ npm install
 1. run backend server <br/>
 python .\manage.py runserver<br/>
 
-2. run frontend app <br/>
+2. run client app <br/>
 cd .\reactfrontend <br/>
 npm start
 
