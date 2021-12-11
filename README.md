@@ -24,7 +24,7 @@ This repository does not include third-party code other than the auto-generated 
 pip install -r .\requirements.txt<br/>
 
 2. To install all required packages for front-end:<br/>
-cd .\reactfrontend
+cd .\reactfrontend <br/>
 npm install
 
 <h3>How to run the program</h3>
@@ -33,7 +33,7 @@ npm install
 python .\manage.py runserver<br/>
 
 2. run frontend app <br/>
-cd .\reactfrontend
+cd .\reactfrontend <br/>
 npm start
 
 <h2>Architecture and Technology</h2>
