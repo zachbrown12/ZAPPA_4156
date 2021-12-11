@@ -23,6 +23,7 @@ npm install
 python .\manage.py runserver<br/>
 
 2. run frontend app <br/>
+cd .\reactfrontend
 npm start
 
 <h2>Architecture</h2>
