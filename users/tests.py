@@ -20,14 +20,14 @@ class LoginTestCase(TestCase):
                                                   email='test@user.com',
                                                   password='12345')
 
-    def test_login_page(self):
-        """
-        Test that we can log in
-        """
-        # GIVEN
-        response = self.client.get(LOGIN_URL)
-        # WHEN/THEN
-        self.assertEqual(response.status_code, 200)
+    #def test_login_page(self):
+    #    """
+    #    Test that we can log in
+    #    """
+    #    # GIVEN
+    #    response = self.client.get(LOGIN_URL)
+    #    # WHEN/THEN
+    #    self.assertEqual(response.status_code, 200)
 
     def test_login_not_exits(self):
         """
