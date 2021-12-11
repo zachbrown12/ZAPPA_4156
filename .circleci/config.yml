@@ -6,12 +6,6 @@ jobs:
   run-tests:
     docker:
       - image: circleci/python:3.9.7
-      - image: circleci/postgres:10.5
-    environment:
-      DATABASE_URL: postgres://postgres:@localhost/circle_test
-      DJANGO_SECRET_KEY: test
-      DJANGO_READ_DOT_ENV_FILE: True
-      DJANGO_SETTINGS_MODULE: zappa.settings
     working_directory: ~/app
     steps:
       - checkout
@@ -31,32 +25,21 @@ jobs:
           name: Add python project to path
           command: 'echo "$(realpath .)/app" > venv/lib/python3.9/site-packages/app.pth'
       - run:
-          name: Migrate DB
-          command: |
-           . venv/bin/activate
-           python manage.py makemigrations trade_simulation
-           python manage.py migrate
-      - run:
           name: Run tests
           command: |
             . venv/bin/activate
-            pipenv run python manage.py test --noinput
+            pipenv run coverage manage.py test --noinput
+            pipenv run coverage report
+            pipenv run coverage html
       - store_test_results:
           path: test-results
       - store_artifacts:
-          path: test-results
-          destination: tr1
+          path: htmlcov
       #- sonarcloud/scan
 
   flake8-test:
     docker:
       - image: circleci/python:3.9.7
-      - image: circleci/postgres:10.5
-    environment:
-      DATABASE_URL: postgres://postgres:@localhost/circle_test
-      DJANGO_SECRET_KEY: test
-      DJANGO_READ_DOT_ENV_FILE: True
-      DJANGO_SETTINGS_MODULE: zappa.settings
     working_directory: ~/app
     steps:
       - checkout
