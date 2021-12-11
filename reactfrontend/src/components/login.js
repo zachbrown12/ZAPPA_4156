@@ -15,7 +15,7 @@ export default function Login(props) {
     };
 
     axios
-      .post(`/users/login/`, JSON.stringify(user), {
+      .post(`/auth/`, JSON.stringify(user), {
         headers: { "Content-Type": "application/json" },
       })
       .then((res) => {
