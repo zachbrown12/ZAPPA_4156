@@ -4,7 +4,12 @@
 
 <p>This project is a combination of front-end program and an back-end API server for creating competitive stock-trading games, in which the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
 
-<h2>Install and Run</h2>
+<h2>Online Endpoint<h2>
+
+<h3>Back-end API server</h3>
+https://zappa-api.herokuapp.com/api
+
+<h2>Local Installation</h2>
 
 <h3>installation </h3>
 
@@ -26,14 +31,11 @@ python .\manage.py runserver<br/>
 cd .\reactfrontend
 npm start
 
-<h2>Architecture</h2>
+<h2>Architecture and Technology</h2>
 
 <h3>Architecture v2.0</h3>
 
 <img src="images/architecture.png" width="600" />
-  
-<h3>URL</h3>
-https://zappa-api.herokuapp.com/api
  
 <h3>Database v2.0</h3>
 
