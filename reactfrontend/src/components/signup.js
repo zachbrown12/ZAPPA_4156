@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
 import { FormControl, Input, InputLabel, Button } from "@mui/material";
+import CSRFToken from "./csrfToken";
 
 export default function Signup(props) {
   const [password1, setPassword1] = useState("");
@@ -23,7 +24,10 @@ export default function Signup(props) {
 
     axios
       .post(`/users/register/`, JSON.stringify(user), {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": props.csrftoken,
+        },
       })
       .then((res) => {
         console.log(res.status);
@@ -45,6 +49,7 @@ export default function Signup(props) {
               margin="normal"
               style={{ margin: "20px" }}
             >
+              <CSRFToken csrftoken={props.csrftoken} />
               <InputLabel htmlFor="username">Username</InputLabel>
               <Input
                 name="username"
@@ -62,6 +67,7 @@ export default function Signup(props) {
               margin="normal"
               style={{ margin: "20px" }}
             >
+              <CSRFToken csrftoken={props.csrftoken} />
               <InputLabel htmlFor="password">Password</InputLabel> <br />
               <Input
                 name="password"
@@ -79,6 +85,7 @@ export default function Signup(props) {
               margin="normal"
               style={{ margin: "20px" }}
             >
+              <CSRFToken csrftoken={props.csrftoken} />
               <InputLabel htmlFor="password">Confirm Password</InputLabel>{" "}
               <br />
               <Input
