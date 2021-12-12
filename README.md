@@ -58,7 +58,7 @@ Our main application logic is contained within the following files:
   <li>trade_simulation/models.py</li>
   <li>users/models.py</li>
   <li>users/urls.py</li>
-  <li>users/views.py</li>
+  <li>users/views.py </li>
 </ul>
 
 <h3> Continuous integration  </h3>
