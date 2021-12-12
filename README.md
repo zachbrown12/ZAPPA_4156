@@ -143,7 +143,7 @@ Each Holding represents shares of a stock held in a portfolio. A Holding has a "
 <blockquote><i>Example: /api/holding/portfolio 1/test game 1/AAPL</blockquote></i>
 
 <h4>Options</h4>
-Each Option represents the ability to either buy or sell shares of a stock at a specific strike price before its expiration date. An Option has a "contract" (a string of max length 25 representing the standard contract symbol containing the essential info about the option), and a value "quantity" a floating-point number less than 10<sup>12</sup>, with two decimal digits). One stock option (quantity 1.0) can be used to trade 100 shares.<br/><br/>
+Each Option represents the ability to either buy or sell shares of a stock at a specific strike price before its expiration date. An Option has a "contract" (a string of max length 25 representing the standard contract symbol containing the essential info about the option), and a value "quantity" (a floating-point number less than 10<sup>12</sup>, with two decimal digits). One stock option (quantity 1.0) can be used to trade 100 shares.<br/><br/>
 
 <b>GET</b>   /api/options/ -- Returns all stock options in the database.<br/>
 
