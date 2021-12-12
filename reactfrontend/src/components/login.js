@@ -2,14 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
 import { FormControl, Input, InputLabel, Button } from "@mui/material";
+import CSRFToken from "./csrfToken";
 
 export default function Login(props) {
   const [password, setPassword] = useState("");
-  const CSRFToken = () => {
-    return (
-      <input type="hidden" name="csrfmiddlewaretoken" value={props.csrftoken} />
-    );
-  };
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -45,7 +41,7 @@ export default function Login(props) {
             margin="normal"
             style={{ margin: "20px" }}
           >
-            <CSRFToken />
+            <CSRFToken csrftoken={props.csrftoken} />
             <InputLabel htmlFor="username">Username</InputLabel>
             <Input
               name="username"
@@ -63,7 +59,7 @@ export default function Login(props) {
             margin="normal"
             style={{ margin: "20px" }}
           >
-            <CSRFToken />
+            <CSRFToken csrftoken={props.csrftoken} />
             <InputLabel htmlFor="password">Password</InputLabel> <br />
             <Input
               name="password"
