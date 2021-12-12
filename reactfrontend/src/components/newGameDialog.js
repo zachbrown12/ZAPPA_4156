@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useState } from "react";
-import axios from "axios";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -22,7 +21,8 @@ export default function NewGameDialog(props) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: data
       })
       .then((res) => console.log(res.status));
   };
