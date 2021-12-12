@@ -1,18 +1,18 @@
 # ZAPPA_4156 Group Project: Trade Simulation
 
-<h3>Overview</h3>
+<h2>Overview</h2>
 
-<p>This project is a combination of front-end program and an back-end API server for creating competitive stock-trading games, in which the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
+<p>This project is a combination of a front-end program and a back-end API server for creating competitive stock-trading games. Using our service, the owners of virtual stock portfolios with an initial cash balance at the game's start can compete by buying and selling shares of stock at real market prices to achieve the highest portfolio value by the game's end. It uses stock price data from Yahoo Finance, which means players' knowledge of the real stock market will be a competitive advantage.<p>  
 
 <h2>Online Program</h2>
 
-<p>We hold back-end API server in Heroku, but client to run on "localhost"<p>
+<p>We host the back-end API server on Heroku, but the client runs on "localhost".<p>
 
 <h3>Back-end API endpoint</h3>
 https://zappa-api.herokuapp.com/api
 
 <h3>Client app</h3>
-Following installation section to run client on "localhost".
+The following installation section explains how to run client on "localhost".
 
 <h2>Local Installation</h2>
 
