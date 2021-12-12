@@ -15,13 +15,14 @@ export default function LandingPage(props) {
   };
 
   const fetchGameData = async () => {
+    console.log("Fetching game data");
     axios
       .get("/api/games")
       .then((resp) => {
         console.log(resp.data);
         setGamesData(resp.data);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err.response.data));
   };
 
   const logOutUser = () => {

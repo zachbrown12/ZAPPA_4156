@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
+from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -33,39 +34,28 @@ def login_user(request):
 
         if user is not None:
             login(request, user)
-            return redirect("profiles")
+            return Response()
         else:
             messages.error(request, "Username or password is incorrect")
 
-    return render(request, "login_register.html")
+    return Response()
 
 
+@api_view(["POST"])
 @csrf_exempt
 def register_user(request):
     """
     Render a page to register a new user
     """
-    page = "register"
-    form = UserCreationForm()
+    username = request.data.get("username")
+    password1 = request.data.get("password1")
 
     # post the register request and redirect to the account page
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.username = user.username.lower()
-            user.save()
+        User.objects.create(username=username, password=password1)
+        print(User.objects.all())
 
-            messages.success(request, "User account was created")
-
-            login(request, user)
-            return redirect("profiles")
-
-        else:
-            messages.error(request, "An error has occurred during registration!")
-
-    context = {"page": page, "form": form}
-    return render(request, "login_register.html", context)
+    return Response()
 
 
 def logout_user(request):
