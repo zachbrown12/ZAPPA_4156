@@ -94,13 +94,13 @@ Each Game contains Portfolios that compete against each other to attain the high
 <b>GET</b>   /api/games/ -- Returns the current status of all games and the portfolios within, including the values and rankings of portfolios within each game, using stock bid prices at the time called.<br/>
 
 <b>GET</b>   /api/game/{game_title} -- Returns the current status of the game with title {game_title} and the portfolios within, including the values and rankings of its portfolios, using stock bid prices at the time called.
-<blockquote><i> Example: /api/game/test game 1 </blockquote></i><br/>
+<blockquote><i> Example: /api/game/test game 1 </blockquote></i>
 
-<b>POST</b>   /api/game/{game_title} -- Creates a new game with title {game_title}. Requires body parameter "rules", and takes optional body parameter "startingBalance" (default 10000.0).
-<blockquote><i> Example: /api/game/test game 2 ,</br> Body: {"rules": "All's fair in love and war", "startingBalance": "30000.0"} </blockquote></i><br/>
+<b>POST</b>   /api/game/{game_title} -- Creates a new game with title {game_title}. Takes optional body parameters "rules" and "startingBalance" (default 10000.0).
+<blockquote><i> Example: /api/game/test game 2 </br> Body: {"rules": "All's fair in love and war", "startingBalance": "30000.0"} </blockquote></i>
 
 <b>DELETE</b>   /api/game/{game_title} -- Deletes the game with title {game_title}. 
-<blockquote><i> Example: /api/game/test game 1 </blockquote></i><br/>
+<blockquote><i> Example: /api/game/test game 2 </blockquote></i>
 
 <h4>Portfolios</h4>
 Each Portfolio contains Holdings of stocks in various amounts. A Portfolio has a "title" (a string of maximum length 200), a "cash_balance" (a floating-point number less than 10<sup>14</sup>, with two decimal digits), a "total_value" computed from stock holdings plus cash balance, and a "game_rank" determined by how its total_value stacks up against other Portfolios in the same Game.<br/><br/>
@@ -108,25 +108,29 @@ Each Portfolio contains Holdings of stocks in various amounts. A Portfolio has a
 <b>GET</b>   /api/portfolios/ -- Returns the current status of all portfolios, including the current total_value of each, using stock bid prices at the time called.<br/>
 
 <b>GET</b>   /api/portfolio/{game_title}/{port_title} -- Returns the current status of the portfolio from {game_title} with the title {port_title}, including its current total_value, using stock bid prices at the time called.<br/>
-<blockquote><i>Example: /api/portfolio/test game 1/portfolio 1</blockquote></i><br/>
+<blockquote><i>Example: /api/portfolio/test game 1/portfolio 1</blockquote></i>
 
 <b>POST</b>   /api/portfolio/{game_title}/{port_title} -- Creates a portfolio in game {game_title} with title {port_title}, with a starting cash_balance equal to the game's starting_balance.<br/>
-<blockquote><i>Example: /api/portfolio/test game 1/portfolio 2</blockquote></i><br/>
+<blockquote><i>Example: /api/portfolio/test game 1/portfolio 2</blockquote></i>
 
 <b>DELETE</b>   /api/portfolio/{game_title}/{port_title} -- Deletes the portfolio from {game_title} with title {port_title}.<br/>
-<blockquote><i>Example: /api/portfolio/test game 1/portfolio 2</blockquote></i><br/>
+<blockquote><i>Example: /api/portfolio/test game 1/portfolio 2</blockquote></i>
 
 <b>POST</b>   /api/portfolio/trade -- Performs a transaction on a portfolio. This can be one of two types depending on body parameters:
 <ul style="list-style-type:none">
-<li>If the value of the required parameter "securityType" is "stock", then parameters "portfolioTitle", "gameTitle", "ticker", and "shares" are required. If the value of "shares" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "shares" shares of the stock with ticker "ticker". If the value of "shares" is negative, that portfolio will sell "shares" shares of that stock instead.</br>
-<blockquote><i> Example: /api/portfolio/trade ,</br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "test game 1", "securityType": "stock", "ticker":"AAPL", "shares":50.0} </blockquote></i><br/>
+<li>
+ 
+ If the value of the required parameter "securityType" is "stock", then parameters "portfolioTitle" (string), "gameTitle" (string), "ticker" (string), and "shares" (float) are required. If the value of "shares" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "shares" shares of the stock with ticker "ticker". If the value of "shares" is negative, that portfolio will sell "shares" shares of that stock instead.
+<blockquote><i> Example: /api/portfolio/trade </br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "test game 1", "securityType": "stock", "ticker":"AAPL", "shares":50.0} </blockquote></i>
 
 Also, if the value of the optional parameter "exercise" is a contract symbol of an option in the portfolio that can be exercised to transact "shares" shares of the stock with ticker "ticker" at a different price, then that option will be exercised, and the quantity of that option in the portfolio will be correctly deducted.
-<blockquote><i> Example: /api/portfolio/trade ,</br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "test game 1", "securityType": "stock", "ticker":"TSLA", "shares":-10.0, "exercise":"TSLA211231P01115000"} </blockquote></i><br/>
+<blockquote><i> Example: /api/portfolio/trade </br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "test game 1", "securityType": "stock", "ticker":"TSLA", "shares":-10.0, "exercise":"TSLA211231P01115000"} </blockquote></i>
 </li>
 
-<li>If the value of the required parameter "securityType" is "option", then parameters "portfolioTitle", "gameTitle", "contract", and "quantity" are required. If the value of "quantity" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "quantity" amount of options with contract "contract". If the value of "quantity" is negative, that portfolio will sell "quantity" options with that contract instead.
-<blockquote><i> Example: /api/portfolio/trade ,</br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "manual test game 1", "securityType": "option", "contract":"AAPL211223C00148000", "quantity":-1.0} </blockquote></i><br/>
+<li>
+ 
+ If the value of the required parameter "securityType" is "option", then parameters "portfolioTitle" (string), "gameTitle" (string), "contract" (string), and "quantity" (float) are required. If the value of "quantity" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "quantity" amount of options with contract "contract". If the value of "quantity" is negative, that portfolio will sell "quantity" options with that contract instead. <br/>
+<blockquote><i> Example: /api/portfolio/trade </br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "manual test game 1", "securityType": "option", "contract":"AAPL211223C00148000", "quantity":-1.0} </blockquote></i>
 </li>
 </ul>
 
@@ -136,7 +140,7 @@ Each Holding represents shares of a stock held in a portfolio. A Holding has a "
 <b>GET</b>   /api/holdings/ -- Returns all stock holdings in the database.<br/>
 
 <b>GET</b>   /api/holding/{port_title}/{game_title}/{ticker} -- Returns the holding in the portfolio {port_title} within the game {game_title} that has the ticker {ticker}.<br/>
-<blockquote><i>Example: /api/holding/portfolio 1/test game 1/AAPL</blockquote></i><br/>
+<blockquote><i>Example: /api/holding/portfolio 1/test game 1/AAPL</blockquote></i>
 
 <h4>Options</h4>
 Each Option represents the ability to either buy or sell shares of a stock at a specific strike price before its expiration date. An Option has a "contract" (a string of max length 25 representing the standard contract symbol containing the essential info about the option), and a value "quantity" a floating-point number less than 10<sup>12</sup>, with two decimal digits). One stock option (quantity 1.0) can be used to trade 100 shares.<br/><br/>
@@ -144,7 +148,7 @@ Each Option represents the ability to either buy or sell shares of a stock at a 
 <b>GET</b>   /api/options/ -- Returns all stock options in the database.<br/>
 
 <b>GET</b>   /api/option/{port_title}/{game_title}/{contract} -- Returns the option in the portfolio {port_title} within the game {game_title} that has the contract symbol {contract}.<br/>
-<blockquote><i>Example: /api/option/portfolio 1/test game 1/AAPL211223C00148000</blockquote></i><br/>
+<blockquote><i>Example: /api/option/portfolio 1/test game 1/AAPL211223C00148000</blockquote></i>
 
 <h4>Transactions</h4>
 Each Transaction is a record of a transaction performed by a portfolio. A Transaction may record a portfolio buying or selling stock with or without exercising options, or buying or selling options. A Transaction has a "ticker", a "trade_type" depending on what was performed, a quantity "shares", and a "bought_price" recording the price at the time of transaction.<br/><br/>
@@ -152,6 +156,6 @@ Each Transaction is a record of a transaction performed by a portfolio. A Transa
 <b>GET</b>   /api/transactions/ -- Returns all transaction records in the database.<br/>
 
 <b>GET</b>   /api/transaction/{uid} -- Returns the transaction record with uid {uid}.<br/>
-<blockquote><i>Example: /api/transaction/c971b071-7d59-4d96-be9b-710a463c0fb7</blockquote></i><br/>
+<blockquote><i>Example: /api/transaction/c971b071-7d59-4d96-be9b-710a463c0fb7</blockquote></i>
 
 
