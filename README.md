@@ -119,9 +119,15 @@ Each Portfolio contains Holdings of stocks in various amounts. A Portfolio has a
 <b>POST</b>   /api/portfolio/trade -- Performs a transaction on a portfolio. This can be one of two types depending on body parameters:
 <ul style="list-style-type:none">
 <li>If the value of the required parameter "securityType" is "stock", then parameters "portfolioTitle", "gameTitle", "ticker", and "shares" are required. If the value of "shares" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "shares" shares of the stock with ticker "ticker". If the value of "shares" is negative, that portfolio will sell "shares" shares of that stock instead.</br>
+<blockquote><i> Example: /api/portfolio/trade ,</br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "test game 1", "securityType": "stock", "ticker":"AAPL", "shares":50.0} </blockquote></i><br/>
+
 Also, if the value of the optional parameter "exercise" is a contract symbol of an option in the portfolio that can be exercised to transact "shares" shares of the stock with ticker "ticker" at a different price, then that option will be exercised, and the quantity of that option in the portfolio will be correctly deducted.
+<blockquote><i> Example: /api/portfolio/trade ,</br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "test game 1", "securityType": "stock", "ticker":"TSLA", "shares":-10.0, "exercise":"TSLA211231P01115000"} </blockquote></i><br/>
 </li>
-<li>If the value of the required parameter "securityType" is "option", then parameters "portfolioTitle", "gameTitle", "contract", and "quantity" are required. If the value of "quantity" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "quantity" amount of options with contract "contract". If the value of "quantity" is negative, that portfolio will sell "quantity" options with that contract instead.</li>
+
+<li>If the value of the required parameter "securityType" is "option", then parameters "portfolioTitle", "gameTitle", "contract", and "quantity" are required. If the value of "quantity" is positive, the portfolio in game "gameTitle" with title "portfolioTitle" will buy "quantity" amount of options with contract "contract". If the value of "quantity" is negative, that portfolio will sell "quantity" options with that contract instead.
+<blockquote><i> Example: /api/portfolio/trade ,</br> Body: {"portfolioTitle": "portfolio 1", "gameTitle": "manual test game 1", "securityType": "option", "contract":"AAPL211223C00148000", "quantity":-1.0} </blockquote></i><br/>
+</li>
 </ul>
 
 <h4>Holdings</h4>
