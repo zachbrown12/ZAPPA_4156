@@ -61,8 +61,8 @@ def handle_users(request):
     if request.method == GET_METHOD:
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
-        userResponse = serializer.data
-        resp = Response(userResponse)
+        user_response = serializer.data
+        resp = Response(user_response)
         return resp
     elif request.method == POST_METHOD:
         username = request.data.get("username")
