@@ -65,7 +65,7 @@ Our main application logic is contained within the following files:
 
 We are using <a href="https://circleci.com/">CircleCI</a> for continuous integration of unit tests, system tests, and style checking.
 Additionally, we are using <a href="https://sonarcloud.io/">SonarCloud</a> for static analysis.
-All of these tasks occur automatically when creating or updating a pull request in GitHub.
+All of these tasks occur automatically upon commit in GitHub.
 
 <ul style="list-style-type:none">
 <li><h4> Unit tests </h4>
