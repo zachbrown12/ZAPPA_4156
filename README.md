@@ -61,7 +61,7 @@ Our main application logic is contained within the following files:
   <li>users/views.py</li>
 </ul>
 
-<h3> Continuous integration </h3>
+<h3> Continuous integration  </h3>
 
 We are using <a href="https://circleci.com/">CircleCI</a> for continuous integration of unit tests, system tests, and style checking.
 Additionally, we are using <a href="https://sonarcloud.io/">SonarCloud</a> for static analysis.
