@@ -47,12 +47,11 @@ export default function PortfoliosDialog(props) {
   };
 
   const getPortfolio = async (portfolioName) => {
-    axios
+    await axios
       .get(`/api/portfolio/${props.gameTitle}/${portfolioName}`)
       .then((res) => {
         console.log(res.data);
         setSelectedRowData(res.data);
-
       })
       .catch((err) => console.log(err.response.data));
   };
@@ -67,7 +66,8 @@ export default function PortfoliosDialog(props) {
     setCreateNewPortfolioVisible(true);
   };
 
-  const changeCreateNewPortfolioVisible = () => {
+  const changeCreateNewPortfolioVisible = async () => {
+    await props.getPortfolios(props.gameTitle);
     setCreateNewPortfolioVisible(!createNewPortfolioVisible);
   };
 

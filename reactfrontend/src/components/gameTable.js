@@ -2,10 +2,12 @@ import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useState } from "react";
 import PortfoliosDialog from "./portfoliosDialog";
+import axios from "axios";
 
 export default function GameTable(props) {
   let [portfoliosDialogVisible, setPortfoliosDialogVisible] = useState(false);
   let [selectedRowData, setSelectedRowData] = useState([]);
+  let [portfolios, setPortfolios] = useState([]);
 
   const setVisible = () => {
     setPortfoliosDialogVisible(!portfoliosDialogVisible);
@@ -37,9 +39,26 @@ export default function GameTable(props) {
     return resp;
   };
 
-  const handleOnRowClick = (e) => {
+  const getPortfolios = async (gameTitle) => {
+    console.log("Fetching all portfolios...");
+    await axios
+      .get("/api/portfolios")
+      .then((resp) => {
+        console.log(resp.data);
+        setPortfolios(
+          resp.data.filter((p) => {
+            return p.title == gameTitle;
+          })
+        );
+      })
+      .catch((err) => console.log(err.response.data));
+  };
+
+  const handleOnRowClick = async (e) => {
     let data = e.row;
+    console.log(data);
     setSelectedRowData(data);
+    await getPortfolios();
     setPortfoliosDialogVisible(true);
   };
 
@@ -56,6 +75,7 @@ export default function GameTable(props) {
             open={portfoliosDialogVisible}
             setDialogVisible={setVisible}
             portfolios={selectedRowData.portfolios}
+            getPortfolios={getPortfolios}
             gameTitle={selectedRowData.title}
             username={props.username}
           ></PortfoliosDialog>
