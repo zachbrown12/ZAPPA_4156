@@ -15,13 +15,16 @@ export default function NewPortfolioDialog(props) {
       username: props.username,
     });
 
-    axios
-      .post(`/api/portfolio/${props.gameTitle}/${title}/`, data, {
-        headers: { "Content-Type": "application/json" },
-      })
-      .then((res) => console.log(res.status))
-      .catch((err) => console.log(err.response.data)); // TODO: Add better error
-  };
+  fetch(`http://127.0.0.1:8000/api/portfolio/${props.gameTitle}/${title}/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: data
+  })
+  .then((res) => console.log(res.status));
+};
+
 
   const handleSave = async () => {
     await createNewPortfolio();

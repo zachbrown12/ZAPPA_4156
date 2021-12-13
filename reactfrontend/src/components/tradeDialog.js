@@ -43,13 +43,17 @@ export default function TradeDialog(props) {
     }
 
     data = JSON.stringify(data);
-    axios
-      .post(`/api/portfolio/trade`, data, {
-        headers: { "Content-Type": "application/json" },
-      })
-      .then((res) => console.log(res.status))
-      .catch((err) => console.log(err.response.data)); // TODO: Add better error
-  };
+
+  fetch(`http://127.0.0.1:8000/api/portfolio/trade`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: data
+  })
+  .then((res) => console.log(res.status));
+};
+
 
   const handleTrade = async () => {
     await trade();

@@ -17,7 +17,7 @@ export default function LandingPage(props) {
   const fetchGameData = async () => {
     console.log("Fetching game data");
     axios
-      .get("/api/games")
+      .get("/api/games/")
       .then((resp) => {
         console.log(resp.data);
         setGamesData(resp.data);
