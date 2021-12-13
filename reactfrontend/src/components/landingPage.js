@@ -21,8 +21,10 @@ export default function LandingPage(props) {
       .then((resp) => {
         console.log(resp.data);
         setGamesData(resp.data);
+        fetchGameData()
       })
       .catch((err) => console.log(err.response.data));
+
   };
 
   const logOutUser = () => {

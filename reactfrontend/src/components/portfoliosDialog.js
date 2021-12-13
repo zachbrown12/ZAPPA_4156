@@ -52,6 +52,7 @@ export default function PortfoliosDialog(props) {
       .then((res) => {
         console.log(res.data);
         setSelectedRowData(res.data);
+
       })
       .catch((err) => console.log(err.response.data));
   };
