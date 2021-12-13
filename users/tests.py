@@ -20,15 +20,6 @@ class LoginTestCase(TestCase):
                                                   email='test@user.com',
                                                   password='12345')
 
-    # def test_login_page(self):
-    #    """
-    #    Test that we can log in
-    #    """
-    #    # GIVEN
-    #    response = self.client.get(LOGIN_URL)
-    #    # WHEN/THEN
-    #    self.assertEqual(response.status_code, 200)
-
     def test_login_not_exits(self):
         """
         Test that we can not log in
@@ -38,15 +29,6 @@ class LoginTestCase(TestCase):
         # WHEN/THEN
         self.assertEqual(response.status_code, 200)
 
-    # def test_login_fail(self):
-    #    """
-    #    Test that failing log in
-    #    """
-    #    # GIVEN
-    #    response = self.client.post(LOGIN_URL, {'username': self.test_user.username, 'password': '12345'})
-    #    # WHEN/THEN
-    #    self.assertEqual(response.status_code, 302)
-
 
 class RegisterTestCase(TestCase):
 
@@ -55,24 +37,6 @@ class RegisterTestCase(TestCase):
         self.test_user = User.objects.create_user(username='test_user',
                                                   email='test@user.com',
                                                   password='12345')
-
-    # def test_register_page(self):
-    #    """
-    #    Test that we render register page
-    #    """
-    #    # GIVEN
-    #    response = self.client.get(REGISTER_URL)
-    #    # WHEN/THEN
-    #    self.assertEqual(response.status_code, 200)
-
-    # def test_register(self):
-    #    """
-    #    Test that we can register
-    #    """
-    #    # GIVEN
-    #    response = self.client.post(REGISTER_URL, {'username': 'testuser', 'password1': 'test123456', 'password2': 'test123456'})
-    #    # WHEN/THEN
-    #    self.assertEqual(response.status_code, 302)
 
     def test_register_fail(self):
         """
