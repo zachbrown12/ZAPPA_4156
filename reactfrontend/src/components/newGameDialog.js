@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useState } from "react";
-import axios from "axios";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -18,13 +17,16 @@ export default function NewGameDialog(props) {
       rules: rules,
     });
 
-    axios
-      .post(`/api/game/${name}`, data, {
-        headers: { "Content-Type": "application/json" },
+    fetch(`http://127.0.0.1:8000/api/game/${name}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: data
       })
-      .then((res) => console.log(res.status))
-      .catch((err) => console.log(err.response.data)); // TODO: Add better error
+      .then((res) => console.log(res.status));
   };
+    
 
   const handleSave = async () => {
     await createNewGame();
